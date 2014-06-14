@@ -7,6 +7,19 @@ import Graphics.WebGL (..)
 import Graphics.ObjTypes (..)
 
 
+basicFragShader = [glsl|
+
+precision mediump float;
+varying vec3 vcolor;
+
+void main () {
+    gl_FragColor = vec4(vcolor, 1.0);
+}
+
+|]
+
+
+
 vertexShaderVN : Shader VertVN { unif |  modelMatrix:Mat4, viewMatrix:Mat4, normalMatrix:Mat4, inputColor : Vec3 } { vcolor:Vec3 }
 vertexShaderVN = [glsl|
 
@@ -55,13 +68,64 @@ void main(){
 |]
 
 fragmentShaderVN : Shader {} u { vcolor:Vec3 }
-fragmentShaderVN = [glsl|
+fragmentShaderVN = basicFragShader
 
-precision mediump float;
+
+
+
+
+vertexShaderV : Shader VertV { unif |  modelMatrix:Mat4, viewMatrix:Mat4, inputColor : Vec3 } { vcolor:Vec3 }
+vertexShaderV = [glsl|
+
+attribute vec3 position;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform vec3 inputColor;
 varying vec3 vcolor;
 
-void main () {
-    gl_FragColor = vec4(vcolor, 1.0);
+
+void main(){
+  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);
+  
+  
+  vcolor = inputColor;
 }
 
-|]  
+
+|]
+
+fragmentShaderV : Shader {} u { vcolor:Vec3 }
+fragmentShaderV = basicFragShader
+
+vertexShaderVT : Shader VertVT { unif |  modelMatrix:Mat4, viewMatrix:Mat4 } { vcoord : Vec3 }
+vertexShaderVT = [glsl|
+
+attribute vec3 position;
+attribute vec3 texCoord;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+varying vec3 vcoord;
+
+
+void main(){
+  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);
+  
+   vcoord = texCoord;
+  
+}
+
+
+|]
+
+fragmentShaderVT : Shader {} { u | texture:Texture } { vcoord:Vec3 }
+fragmentShaderVT = [glsl|
+
+precision mediump float;
+uniform sampler2D texture;
+varying vec3 vcoord;
+
+void main () {
+  gl_FragColor = texture2D(texture, vcoord);
+}
+
+|]

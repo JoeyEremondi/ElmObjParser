@@ -12,6 +12,7 @@ import Graphics.WebGL (..)
 import Graphics.ObjShaders (..)
 
 import Graphics.ObjTypes (..)
+import Graphics.Camera as Camera
 
 type Uniforms = { viewMatrix: Mat4, modelMatrix : Mat4, normalMatrix : Mat4, inputColor: Vec3 }
 
@@ -22,20 +23,15 @@ data FaceVert =   FaceVertV VertV
 
 data Model = 
   FlatColored [Triangle VertV] {color:Vec3}
-  | FlatTextured [Triangle VertVT] {texPath : String}
+  | FlatTextured [Triangle VertVT] {texture : Texture}
   | SmoothColored [Triangle VertVN] {color:Vec3}
-  | SmoothTextured [Triangle VertVTN] {texPath : String}
+  | SmoothTextured [Triangle VertVTN] {texture : Texture}
 
-modelTex : Model -> Maybe String
-modelTex model = case model of
-  FlatColored _ _ -> Nothing
-  SmoothColored _ _ -> Nothing
-  FlatTextured _ rec -> Just rec.texPath
-  SmoothTextured _ rec -> Just rec.texPath
+
   
 
 
-data ColorData = OneColor Vec3 | TexLoc String
+data ColorData = OneColor Vec3 | OneTexture Texture
 
 --Helper function
 triToList : Triangle a -> [a]
@@ -49,10 +45,10 @@ toModel objSource colorData = let
   in case (containsV faceList, containsVT faceList, containsVN faceList, colorData) of
     (True, _, _, OneColor col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
     (_, True, True, OneColor col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
-    (_, True, _, TexLoc texLoc) -> FlatTextured (map (mapTriangle toVT) triangles) {texPath = texLoc}
+    (_, True, _, OneTexture tex) -> FlatTextured (map (mapTriangle toVT) triangles) {texture = tex}
     (_, True, _, OneColor col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
     (_, _, True, OneColor col) -> SmoothColored (map (mapTriangle toVN) triangles) {color = col}
-    (False, False, False, TexLoc texLoc) ->  SmoothTextured (map (mapTriangle toVTN) triangles) {texPath = texLoc}
+    (False, False, False, OneTexture tex) ->  SmoothTextured (map (mapTriangle toVTN) triangles) {texture = tex}
     (False, False, False, OneColor col) ->   SmoothColored (map (mapTriangle toVN) triangles) {color = col}
     _ -> FlatColored (map (mapTriangle toV) triangles) {color = vec3 0.5 0.5 0.5}
 
@@ -60,6 +56,8 @@ toEntity : Signal Model -> Signal Uniforms -> Signal Entity
 toEntity sModel sUniforms = let
     mainFun model uniforms = case model of
       (SmoothColored triangles _) -> entity vertexShaderVN fragmentShaderVN triangles uniforms
+      (FlatColored triangles _) -> entity vertexShaderV fragmentShaderV triangles uniforms
+      (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
         
   in lift2 mainFun sModel sUniforms
    
@@ -191,33 +189,43 @@ parseObj inFile =
   in faces
 
 --Test mesh
-mesh inFile = map (\(a,b,c) -> (toVTN a, toVTN b, toVTN c)) <| parseObj inFile
+--mesh inFile = map (\(a,b,c) -> (toVTN a, toVTN b, toVTN c)) <| parseObj inFile
 
 
 --Based off the triangle rendering code from http://elm-lang.org/edit/examples/WebGL/Triangle.elm
   
 -- Create the scene
 
+
+camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
+
 --main : Signal Element
 
 main = let
-    myScene ent =  webgl (400,400) [ent]
+    myScene ent =  webgl (1000,1000) [ent]
     modelSig = lift2 toModel inFileSig (constant <| OneColor <| vec3 0.5 0.1 0.1)
     entSig = toEntity modelSig myUnis
   in lift myScene entSig
 
-myUnis = lift uniformsAtTime (foldp (+) 0 (fps 30))
+myUnis = lift3 uniformsAtTime (constant (1000,1000)) camera (foldp (+) 0 (fps 30))
 
-uniformsAtTime t = let
+uniformsAtTime dims cam t  = let
     m = modelMat (t / 1500)
-    v = identity
+    v = view dims cam
   in { viewMatrix = v, normalMatrix = normal (mul v m), modelMatrix = m, inputColor = vec3 0.5 0.1 0.1 }
 
+--Adapted from firstPerson example
+view : (Int,Int) -> Camera.Camera -> Mat4  
+view (w,h) cam = 
+    mul (makePerspective 45 (toFloat w / toFloat h) 0.01 100)
+        (makeLookAt cam.position (cam.position `add` Camera.direction cam) j)  
 
 modelMat : Float -> Mat4
-modelMat t =
-    mul (makePerspective 45 1 0.01 100)
-        (makeLookAt (vec3 (3 * cos t) 0 ((3 * sin t))) (vec3 0 0 0) (vec3 0 1 0))
+modelMat t = let
+    s = identity
+    tr = identity
+    r = makeRotate t (vec3 0 1 0)
+  in mul tr (mul r s)
 
 normal v = transpose <| inverseOrthonormal v 
 
@@ -231,4 +239,4 @@ inFileSig = let
     resp = Http.sendGet <| constant "http://www.corsproxy.com/goanna.cs.rmit.edu.au/~pknowles/models/wt_teapot.obj"
   in lift fromResponse resp
  
-meshSig = lift mesh inFileSig
+--meshSig = lift mesh inFileSig
