@@ -23,11 +23,13 @@ data FaceVert =   FaceVertV VertV
   | FaceVertVN VertVN
   | FaceVertVTN VertVTN
 
+--TODP empty model a bad idea?
 data Model = 
   FlatColored [Triangle VertV] {color:Vec3}
   | FlatTextured [Triangle VertVT] {texture : Texture}
   | SmoothColored [Triangle VertVN] {color:Vec3}
   | SmoothTextured [Triangle VertVTN] {texture : Texture}
+  | EmptyModel
 
 
   
@@ -60,6 +62,7 @@ toEntity model uniforms = case model of
       (FlatColored triangles _) -> entity vertexShaderV fragmentShaderV triangles uniforms
       (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
       (SmoothTextured triangles rec) -> entity vertexShaderVTN fragmentShaderVTN triangles {uniforms | texture = rec.texture } --TODO fix
+      EmptyModel -> entity vertexShaderVN fragmentShaderVN [] uniforms
 
    
 

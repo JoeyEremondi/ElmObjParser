@@ -33,15 +33,20 @@ main = let
     assets = combine [inAsset, texAsset]
     loadStatSig = lift Load.toLoadStatus assets
     
-    mainFunc loadStatus inFile tex unis = case loadStatus of
+    modelSig = lift2 
+     (\ir tr -> case (ir, tr) of
+       (Http.Success inFile, Http.Success tex) -> toModel inFile ( OneTexture tex)
+       _ -> EmptyModel
+     ) inResp texResp
+    
+    mainFunc loadStatus model unis = case loadStatus of
       Load.InProgress x -> asText x
       Load.LoadFailed sList -> plainText "Failure"
-      Load.LoadComplete -> render (fromResponse inFile) (fromResponse tex) unis
-  in lift4 mainFunc loadStatSig  inResp texResp myUnis
+      Load.LoadComplete -> render model unis
+  in lift3 mainFunc loadStatSig  modelSig myUnis
 
-render inFile tex unis = let
+render model unis = let
     myScene ent =  webgl (1000,1000) [ent]
-    model = toModel inFile ( OneTexture tex)
     ent = toEntity model unis
   in myScene ent
 
