@@ -14,13 +14,7 @@ import Http
 
 fromResponse r = case r of 
   Http.Success s -> s
-  _ -> ""
 
-inFileSig = let
-    resp = Http.sendGet <| constant "http://www.corsproxy.com/goanna.cs.rmit.edu.au/~pknowles/models/wt_teapot.obj"
-  in lift fromResponse resp
- 
---meshSig = lift mesh inFileSig
 
 --Based off the triangle rendering code from http://elm-lang.org/edit/examples/WebGL/Triangle.elm
   
@@ -32,10 +26,24 @@ camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 --main : Signal Element
 
 main = let
+    inResp = Http.sendGet <| constant "/capsule.obj"
+    texResp = loadTexture "/capsule0.jpg"
+    inAsset = lift Load.toElement inResp
+    texAsset = lift Load.toElement inResp
+    assets = combine [inAsset, texAsset]
+    loadStatSig = lift Load.toLoadStatus assets
+    
+    mainFunc loadStatus inFile tex unis = case loadStatus of
+      Load.InProgress x -> asText x
+      Load.LoadFailed sList -> plainText "Failure"
+      Load.LoadComplete -> render (fromResponse inFile) (fromResponse tex) unis
+  in lift4 mainFunc loadStatSig  inResp texResp myUnis
+
+render inFile tex unis = let
     myScene ent =  webgl (1000,1000) [ent]
-    modelSig = lift2 toModel inFileSig (constant <| OneColor <| vec3 0.5 0.1 0.1)
-    entSig = toEntity modelSig myUnis
-  in lift myScene entSig
+    model = toModel inFile ( OneTexture tex)
+    ent = toEntity model unis
+  in myScene ent
 
 myUnis = lift3 uniformsAtTime (constant (1000,1000)) camera (foldp (+) 0 (fps 30))
 

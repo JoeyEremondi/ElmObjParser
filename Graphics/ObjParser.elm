@@ -54,24 +54,30 @@ toModel objSource colorData = let
     (False, False, False, OneColor col) ->   SmoothColored (map (mapTriangle toVN) triangles) {color = col}
     _ -> FlatColored (map (mapTriangle toV) triangles) {color = vec3 0.5 0.5 0.5}
 
-toEntity : Signal Model -> Signal Uniforms -> Signal Entity
-toEntity sModel sUniforms = let
-    mainFun model uniforms = case model of
+toEntity : Model -> Uniforms -> Entity
+toEntity model uniforms = case model of
       (SmoothColored triangles _) -> entity vertexShaderVN fragmentShaderVN triangles uniforms
       (FlatColored triangles _) -> entity vertexShaderV fragmentShaderV triangles uniforms
       (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
-        
-  in lift2 mainFun sModel sUniforms
+      (SmoothTextured triangles rec) -> entity vertexShaderVTN fragmentShaderVTN triangles {uniforms | texture = rec.texture } --TODO fix
+
    
 
 --Functions for checking what data we have avaliable
 --Test if we have vertices of a given information level
+{-
 containsV : [FaceVert] -> Bool
 containsV l = case l of
   [] -> False
   ((FaceVertV _) :: _) -> True
   (_ :: rest) -> containsV rest
-
+-}
+isV vert = case vert of
+  FaceVertV _ -> True
+  _ -> False
+  
+containsV l = any isV l
+  
 containsVT : [FaceVert] -> Bool
 containsVT l = case l of
   [] -> False
