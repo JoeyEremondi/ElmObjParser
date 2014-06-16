@@ -169,8 +169,8 @@ varying vec3 vcoord;
 varying vec3 tcoord;
 varying vec3 vNorm;
 
-const vec3 lightPos = vec3(10.0, 10.0, 10.0);
-const vec3 specColor = vec3(0.02, 0.02, 0.02);
+const vec3 lightPos = vec3(100.0, 100.0, 100.0);
+const vec3 specColor = vec3(0.1, 0.1, 0.1);
 
 void main () {
 
@@ -182,8 +182,8 @@ void main () {
   vec3 reflectDir = reflect(-lightDir, adjustedNormal);
   vec3 viewMatrixDir = (-vertPos);
   
-  vec3 diffuseColor = 0.3*texture2D(texture, tcoord.xy).xyz;
-  vec3 ambientColor = diffuseColor;
+  vec3 diffuseColor = 0.25*texture2D(texture, tcoord.xy).xyz;
+  vec3 ambientColor = 1.5*diffuseColor;
 
   float lambertian = max(dot(lightDir,adjustedNormal), 0.0);
   float specular = 0.0;

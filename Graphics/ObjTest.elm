@@ -2,7 +2,7 @@ module Graphics.ObjTest where
 
 import Graphics.ObjParser (..)
 
-import Graphics.LoadAssets as Load
+import LoadAssets as Load
 
 import Graphics.Camera as Camera
 
@@ -12,8 +12,6 @@ import Graphics.WebGL (..)
 
 import Http
 
-fromResponse r = case r of 
-  Http.Success s -> s
 
 
 --Based off the triangle rendering code from http://elm-lang.org/edit/examples/WebGL/Triangle.elm
@@ -27,23 +25,20 @@ camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 
 main = let
     inResp = Http.sendGet <| constant "/capsule.obj"
-    texResp = loadTexture "/capsule0.jpg"
-    inAsset = lift Load.toElement inResp
-    texAsset = lift Load.toElement inResp
+    texResp = loadTexture "/leopard_spots.jpg"
+    inAsset = lift Load.toAsset inResp
+    texAsset = lift Load.toAsset inResp
     assets = combine [inAsset, texAsset]
-    loadStatSig = lift Load.toLoadStatus assets
+    loadStatSig = lift Load.toStatus assets
     
-    modelSig = lift2 
-     (\ir tr -> case (ir, tr) of
-       (Http.Success inFile, Http.Success tex) -> toModel inFile ( OneTexture tex)
+    modelSig = lift3
+     (\loadStatSig inFile texFile -> case loadStatSig of
+       Load.Complete -> toModel (Load.fromResponseOrFail inFile) ( OneTexture <| Load.fromResponseOrFail texFile)
        _ -> EmptyModel
-     ) inResp texResp
+     ) loadStatSig inResp texResp
     
-    mainFunc loadStatus model unis = case loadStatus of
-      Load.InProgress x -> asText x
-      Load.LoadFailed sList -> plainText "Failure"
-      Load.LoadComplete -> render model unis
-  in lift3 mainFunc loadStatSig  modelSig myUnis
+     
+  in lift2 render modelSig myUnis
 
 render model unis = let
     myScene ent =  webgl (1000,1000) [ent]
