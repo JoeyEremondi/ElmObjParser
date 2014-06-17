@@ -68,13 +68,7 @@ toEntity model uniforms = case model of
 
 --Functions for checking what data we have avaliable
 --Test if we have vertices of a given information level
-{-
-containsV : [FaceVert] -> Bool
-containsV l = case l of
-  [] -> False
-  ((FaceVertV _) :: _) -> True
-  (_ :: rest) -> containsV rest
--}
+
 isV vert = case vert of
   FaceVertV _ -> True
   _ -> False
@@ -198,9 +192,5 @@ parseObj inFile =
     faces = concat <| map (lineToFace (vertices, texCoords, normals) ) fLines
     
   in faces
-
---Test mesh
---mesh inFile = map (\(a,b,c) -> (toVTN a, toVTN b, toVTN c)) <| parseObj inFile
-
 
 
