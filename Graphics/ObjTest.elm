@@ -51,7 +51,7 @@ myUnis = lift3 uniformsAtTime (constant (1000,1000)) camera (foldp (+) 0 (fps 30
 uniformsAtTime dims cam t  = let
     m = modelMat (t / 1500)
     v = view dims cam
-  in { viewMatrix = v, normalMatrix = normal (mul v m), modelMatrix = m, inputColor = vec3 0.5 0.1 0.1 }
+  in { viewMatrix = v, normalMatrix = normal (mul v m), modelMatrix = m}
 
 --Adapted from firstPerson example
 view : (Int,Int) -> Camera.Camera -> Mat4  

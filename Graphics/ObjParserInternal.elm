@@ -58,11 +58,11 @@ toModel objSource colorData = let
 
 toEntity : Model -> Uniforms -> Entity
 toEntity model uniforms = case model of
-      (SmoothColored triangles _) -> entity vertexShaderVN fragmentShaderVN triangles uniforms
-      (FlatColored triangles _) -> entity vertexShaderV fragmentShaderV triangles uniforms
+      (SmoothColored triangles rec) -> entity vertexShaderVN fragmentShaderVN triangles {uniforms | inputColor = rec.color}
+      (FlatColored triangles rec) -> entity vertexShaderV fragmentShaderV triangles {uniforms | inputColor = rec.color}
       (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
       (SmoothTextured triangles rec) -> entity vertexShaderVTN fragmentShaderVTN triangles {uniforms | texture = rec.texture } --TODO fix
-      EmptyModel -> entity vertexShaderVN fragmentShaderVN [] uniforms
+      EmptyModel -> entity vertexShaderV fragmentShaderVN [] {uniforms | inputColor = vec3 0.0 0.0 0.0}
 
    
 
