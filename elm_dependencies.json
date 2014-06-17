@@ -1,5 +1,5 @@
 {
-    "version": "0.1",
+    "version": "0.3",
     "summary": "Load OBJ models for WebGL rendering",
     "description": "This package provides a parser converting OBJ files into triangle lists, possibly with texture-coordinate or normal data. The package also provides the shaders for rendering such models, possibly with textures and lighting.
       Note that elm-webgl and elm-linear-algebra are dependencies of this project. LoadAssets is needed to run the test file.
@@ -8,6 +8,7 @@
     "exposed-modules": ["Graphics.ObjParser", "Graphics.ObjTypes"],
     "elm-version": "0.12.3",
     "dependencies": {
+
     },
     "repository": "https://github.com/JoeyEremondi/ElmObjParser.git"
 }

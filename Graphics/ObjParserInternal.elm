@@ -32,7 +32,10 @@ data Model =
   | EmptyModel
 
 
-  
+ --Normal matrix calculations for a given uniform
+normal unis = let
+     mv = mul unis.viewMatrix unis.modelMatrix 
+  in transpose <| inverseOrthonormal mv 
 
 
 
@@ -57,8 +60,10 @@ toModel objSource colorData = let
     _ -> FlatColored (map (mapTriangle toV) triangles) {color = vec3 0.5 0.5 0.5}
 
 toEntity : Model -> Uniforms -> Entity
-toEntity model uniforms = case model of
-      (SmoothColored triangles rec) -> entity vertexShaderVN fragmentShaderVN triangles {uniforms | inputColor = rec.color}
+toEntity model inUnis = let
+    uniforms = {inUnis | normalMatrix = normal inUnis}
+  in case model of
+      (SmoothColored triangles rec) -> entity vertexShaderVN fragmentShaderVN triangles {uniforms | inputColor = rec.color }
       (FlatColored triangles rec) -> entity vertexShaderV fragmentShaderV triangles {uniforms | inputColor = rec.color}
       (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
       (SmoothTextured triangles rec) -> entity vertexShaderVTN fragmentShaderVTN triangles {uniforms | texture = rec.texture } --TODO fix

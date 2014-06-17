@@ -33,11 +33,17 @@ Vertex containing position, texture coordinates and normal vector
 type VertVTN = {position : Vec3, texCoord : Vec3, normal : Vec3}
 
 {-|
-Information about how to render the surface of an object
+Information about how to render the surface of an object.
+Eventually will support parsing of MTL files and specifying specular 
+and diffuse properties of materials, bump-maps, etc.
 -}
 data MaterialData = OneColor Vec3 | OneTexture Texture
 
 {-|
-Uniform values which must be provided in order to render a model
+Uniform values which must be provided in order to render a model.
+The model matrix defines the object's position, size and orientation in space,
+while the view matrix defines the camera position, as well as the type of 3D projection
+used.
+
 -}
-type Uniforms = { viewMatrix: Mat4, modelMatrix : Mat4, normalMatrix : Mat4 }
+type Uniforms = { viewMatrix: Mat4, modelMatrix : Mat4 }
