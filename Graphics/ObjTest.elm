@@ -1,6 +1,7 @@
 module Graphics.ObjTest where
 
 import Graphics.ObjParser (..)
+import Graphics.ObjTypes (..)
 
 import LoadAssets as Load
 
@@ -34,7 +35,7 @@ main = let
     modelSig = lift3
      (\loadStatSig inFile texFile -> case loadStatSig of
        Load.Complete -> toModel (Load.fromResponseOrFail inFile) ( OneTexture <| Load.fromResponseOrFail texFile)
-       _ -> EmptyModel
+       _ -> emptyModel
      ) loadStatSig inResp texResp
     
      
