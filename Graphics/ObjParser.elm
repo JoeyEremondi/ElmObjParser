@@ -1,5 +1,11 @@
 module Graphics.ObjParser where
 
+{-| General types used in loading of OBJ files.
+
+@docs Model, toModel, toEntity, emptyModel
+
+-}
+
 import String
 import Array
 import Http
@@ -32,8 +38,9 @@ toEntity : Model -> Uniforms -> Entity
 toEntity = Internal.toEntity
 
 {-|
-A "default" model with no triangles
+A default model with no triangles
 -}
+emptyModel : Model
 emptyModel = Internal.EmptyModel
 
    

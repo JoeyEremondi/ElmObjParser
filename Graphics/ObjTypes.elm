@@ -1,8 +1,16 @@
 module Graphics.ObjTypes where
 
+{-| General types used in loading of OBJ files.
+
+@docs VertV, VertVT, VertVN, VertVTN, MaterialData, Uniforms 
+
+-}
+
 import Math.Vector3 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
+
+
 
 {-|
 Vertex containing only position data
