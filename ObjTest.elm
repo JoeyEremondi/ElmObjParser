@@ -1,4 +1,4 @@
-module Graphics.ObjTest where
+module ObjTest where
 
 import Graphics.ObjParser (..)
 import Graphics.ObjTypes (..)
@@ -26,7 +26,7 @@ camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 
 main = let
     inResp = Http.sendGet <| constant "/capsule.obj"
-    texResp = loadTexture "/leopard_spots.jpg"
+    texResp = loadTexture "/capsule0.jpg"
     inAsset = lift Load.toAsset inResp
     texAsset = lift Load.toAsset inResp
     assets = combine [inAsset, texAsset]
