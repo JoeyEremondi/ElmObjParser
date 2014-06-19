@@ -10,6 +10,7 @@ import Math.Vector3 (..)
 import Math.Vector4 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
+import Graphics.Camera (..)
 
 
 
@@ -42,6 +43,10 @@ data MaterialData = OneColorMaterial Vec3 | OneTextureMaterial Texture | FullMat
 
 data ColorData = OneColor Vec4 | TexColor Texture
 
+data ShadowData = NoShadows | SolidShadows
+
+data ProjectionType = Perspective | Ortho
+
 type Material = {
     baseColor : ColorData,
     diffuseColor : Maybe ColorData,
@@ -50,6 +55,17 @@ type Material = {
     
     bumpMap : Maybe Texture,
     reflectivity : Maybe Float
+}
+
+type ObjectProperties = {
+    position : Vec3,
+    rotation : Float,
+    scaleFactor : Vec3
+}
+
+type GlobalProperties = {
+     camera : Camera,
+     shadow : ShadowData
 }
 
 {-|

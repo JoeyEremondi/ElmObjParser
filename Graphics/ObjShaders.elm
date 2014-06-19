@@ -207,17 +207,34 @@ void main () {
 
 
 type FullShaderUniforms = {
+
+    modelMatrix : Mat4,
+    viewMatrix : Mat4,
+    perspectiveMatrix : Mat4,
+    normalMatrix : Mat4,
+    
+    pointLightPosition : Vec3,
+    pointLightSpecular : Vec3,
+    pointLightDiffuse : Vec3,
+    pointLightAmbient : Vec3,
+    
+    sunlightDirection : Vec3,
+    sunlightSpecular : Vec3,
+    sunlightDiffuse : Vec3,
+    sunlightAmbient : Vec3,
+    
+
     ambientColor : Vec4,
     ambientTexture : Texture,
     useAmbientColor : Float,
     useAmbientTexture : Float,
     
-    diffuseColor : Vec4,
+    diffuseColor : Vec3,
     diffuseTexture : Texture,
     useDiffuseColor : Float,
     useDiffuseTexture : Float,
     
-    specularColor : Vec4,
+    specularColor : Vec3,
     specularTexture : Texture,
     useSpecularColor : Float,
     useSpecularTexture : Float,
@@ -225,3 +242,113 @@ type FullShaderUniforms = {
     bumpTexture : Texture,
     useBumpTexture : Float
 }
+
+fullVertexShader : Shader VertVTN FullShaderUniforms { vcoord : Vec3, tcoord : Vec3, vNorm : Vec3 }
+fullVertexShader = [glsl|
+
+attribute vec3 position;
+attribute vec3 texCoord;
+attribute vec3 normal;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 normalMatrix;
+varying vec3 vcoord;
+varying vec3 tcoord;
+varying vec3 vNorm;
+
+
+void main(){
+  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);
+  
+   vcoord = gl_Position.xyz;
+   tcoord = texCoord;
+   vNorm = normalMatrix * normal;
+  
+}
+
+
+|]
+
+fullFragmentShader : Shader {} FullShaderUniforms { vcoord:Vec3, tcoord : Vec3, vNorm : Vec3 }
+fullFragmentShader = [glsl|
+
+precision mediump float;
+uniform sampler2D ambientTexture;
+uniform mat4 normalMatrix;
+uniform vec3 pointLightPosition;
+
+uniform vec3 pointLightPosition;
+uniform vec3 pointLightAmbient;
+uniform vec3 pointLightDiffuse;
+uniform vec3 pointLightSpecular;
+
+uniform vec3 sunlightDirection;
+uniform vec3 sunlightAmbient;
+uniform vec3 sunlightDiffuse;
+uniform vec3 sunlightSpecular;
+
+
+uniform vec4 ambientColor;
+uniform Sampler2D ambientTexture;
+uniform float useAmbientColor;
+uniform float useAmbientTexture;
+
+uniform vec3 diffuseColor;
+uniform Sampler2D diffuseTexture;
+uniform float useDiffuseColor;
+uniform float useDiffuseTexture;
+
+uniform vec3 specularColor;
+uniform Sampler2D specularTexture;
+uniform float useSpecularColor;
+uniform float useSpecularTexture;
+
+uniform Sampler2D bumpTexture;
+uniform float useBumpTexture;
+
+
+
+varying vec3 vcoord;
+varying vec3 tcoord;
+varying vec3 vNorm;
+
+
+void main () {
+
+  // all following gemetric computations are performed in the
+  // camera coordinate system (aka eye coordinates)
+  vec3 normal = vNorm + useBumpTexture*normalize(texture2D(bumpTexture, tcoord.xy));
+  vec3 vertPos = vcoord;
+  vec3 lightDir = (pointLightPosition - vertPos);
+  vec3 reflectDir = reflect(-lightDir, normal);
+  vec3 viewMatrixDir = (-vertPos);
+  
+  vec3 base = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy));
+  
+  vec3 diff = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy));
+  
+  vec3 spec = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy));
+  
+  vec3 diffuseColor = 0.25*texture2D(texture, tcoord.xy).xyz;
+  vec3 ambientColor = 1.5*diffuseColor;
+
+  float lambertian = max(dot(lightDir,adjustedNormal), 0.0);
+  float specular = 0.0;
+  
+  if(lambertian > 0.0) {
+    float specAngle = max(dot(reflectDir, viewMatrixDir), 0.0);
+    specular = pow(specAngle, 0.2);
+       
+    
+  }
+  gl_FragColor = vec4((lambertian*diffuseColor + specular*specColor) + ambientColor, 1.0);
+
+
+
+  
+}
+
+|]
+
+--Simply here to force shader typechecking
+testEntity = entity  fullVertexShader fullFragmentShader []

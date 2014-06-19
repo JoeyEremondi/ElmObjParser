@@ -11,7 +11,7 @@ data Inputs
     = TimeDelta Bool {x:Int, y:Int} Float
     --| Mouse (Int,Int)
 
-type Camera = {position : Vec3, horizontalAngle : Float, verticalAngle : Float}
+type Camera = {position : Vec3, horizontalAngle : Float, verticalAngle : Float, zoom : Float}
 
 eyeLevel : Float
 eyeLevel = -0.5
@@ -27,6 +27,7 @@ defaultCamera =
     { position = vec3 0 eyeLevel -10
     , horizontalAngle = degrees 90
     , verticalAngle = 0
+    , zoom = 1.0
     }  
   
 direction : Camera -> Vec3
