@@ -1,6 +1,7 @@
 module Graphics.ObjShaders where
 
 import Math.Vector3 (..)
+import Math.Vector4 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
@@ -202,3 +203,25 @@ void main () {
 }
 
 |]
+
+
+
+type FullShaderUniforms = {
+    ambientColor : Vec4,
+    ambientTexture : Texture,
+    useAmbientColor : Float,
+    useAmbientTexture : Float,
+    
+    diffuseColor : Vec4,
+    diffuseTexture : Texture,
+    useDiffuseColor : Float,
+    useDiffuseTexture : Float,
+    
+    specularColor : Vec4,
+    specularTexture : Texture,
+    useSpecularColor : Float,
+    useSpecularTexture : Float,
+    
+    bumpTexture : Texture,
+    useBumpTexture : Float
+}

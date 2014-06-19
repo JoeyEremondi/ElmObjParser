@@ -7,6 +7,7 @@ module Graphics.ObjTypes where
 -}
 
 import Math.Vector3 (..)
+import Math.Vector4 (..)
 import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 
@@ -37,7 +38,19 @@ Information about how to render the surface of an object.
 Eventually will support parsing of MTL files and specifying specular 
 and diffuse properties of materials, bump-maps, etc.
 -}
-data MaterialData = OneColor Vec3 | OneTexture Texture
+data MaterialData = OneColorMaterial Vec3 | OneTextureMaterial Texture | FullMaterial Material
+
+data ColorData = OneColor Vec4 | TexColor Texture
+
+type Material = {
+    baseColor : ColorData,
+    diffuseColor : Maybe ColorData,
+    specColor : Maybe ColorData,
+    specCoeff : Maybe Float,
+    
+    bumpMap : Maybe Texture,
+    reflectivity : Maybe Float
+}
 
 {-|
 Uniform values which must be provided in order to render a model.

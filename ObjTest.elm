@@ -34,7 +34,7 @@ main = let
     
     modelSig = lift3
      (\loadStatSig inFile texFile -> case loadStatSig of
-       Load.Complete -> toModel (Load.fromResponseOrFail inFile) ( OneTexture <| Load.fromResponseOrFail texFile)
+       Load.Complete -> toModel (Load.fromResponseOrFail inFile) ( OneTextureMaterial <| Load.fromResponseOrFail texFile)
        _ -> emptyModel
      ) loadStatSig inResp texResp
     

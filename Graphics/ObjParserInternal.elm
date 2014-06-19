@@ -50,13 +50,13 @@ toModel objSource colorData = let
     triangles = parseObj objSource
     faceList = concat <| map triToList triangles
   in case (containsV faceList, containsVT faceList, containsVN faceList, colorData) of
-    (True, _, _, OneColor col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
-    (_, True, True, OneColor col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
-    (_, True, _, OneTexture tex) -> FlatTextured (map (mapTriangle toVT) triangles) {texture = tex}
-    (_, True, _, OneColor col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
-    (_, _, True, OneColor col) -> SmoothColored (map (mapTriangle toVN) triangles) {color = col}
-    (False, False, False, OneTexture tex) ->  SmoothTextured (map (mapTriangle toVTN) triangles) {texture = tex}
-    (False, False, False, OneColor col) ->   SmoothColored (map (mapTriangle toVN) triangles) {color = col}
+    (True, _, _, OneColorMaterial col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
+    (_, True, True, OneColorMaterial col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
+    (_, True, _, OneTextureMaterial tex) -> FlatTextured (map (mapTriangle toVT) triangles) {texture = tex}
+    (_, True, _, OneColorMaterial col) -> FlatColored (map (mapTriangle toV) triangles) {color = col}
+    (_, _, True, OneColorMaterial col) -> SmoothColored (map (mapTriangle toVN) triangles) {color = col}
+    (False, False, False, OneTextureMaterial tex) ->  SmoothTextured (map (mapTriangle toVTN) triangles) {texture = tex}
+    (False, False, False, OneColorMaterial col) ->   SmoothColored (map (mapTriangle toVN) triangles) {color = col}
     _ -> FlatColored (map (mapTriangle toV) triangles) {color = vec3 0.5 0.5 0.5}
 
 toEntity : Model -> Uniforms -> Entity
