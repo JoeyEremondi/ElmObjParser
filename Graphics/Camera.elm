@@ -29,7 +29,9 @@ defaultCamera =
     , verticalAngle = 0
     , zoom = 1.0
     }  
-  
+
+makeView cam = mul (makeTranslate cam.position) <| mul (makeScale <| vec3 cam.zoom cam.zoom cam.zoom) (makeRotate cam.horizontalAngle <| vec3 0 0 0)
+    
 direction : Camera -> Vec3
 direction cam =
     let h = cam.horizontalAngle

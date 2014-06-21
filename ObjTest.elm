@@ -24,6 +24,8 @@ camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 
 --main : Signal Element
 
+
+
 main = let
     inResp = Http.sendGet <| constant "/capsule.obj"
     texResp = loadTexture "/capsule0.jpg"
@@ -32,15 +34,31 @@ main = let
     assets = combine [inAsset, texAsset]
     loadStatSig = lift Load.toStatus assets
     
+
     modelSig = lift3
      (\loadStatSig inFile texFile -> case loadStatSig of
-       Load.Complete -> toModel (Load.fromResponseOrFail inFile) ( OneTextureMaterial <| Load.fromResponseOrFail texFile)
-       _ -> emptyModel
+        Load.Complete -> let
+          tex = Load.fromResponseOrFail texFile
+          material = {
+            baseColor = TexColor tex,
+            diffuseColor = Nothing,
+            specColor = Nothing,
+            specCoeff = Nothing,
+            bumpMap = Nothing,
+            reflectivity = Nothing }
+          
+        in  toModel (Load.fromResponseOrFail inFile) ( FullMaterial material tex )
+        _ -> emptyModel
      ) loadStatSig inResp texResp
     
-     
+  
+    objProperties = {position = vec3 0 0 0,
+                rotation = 0,
+                scaleFactor = vec3 0 0 0}
+  
   in lift2 render modelSig myUnis
-
+  
+  
 render model unis = let
     myScene ent =  webgl (1000,1000) [ent]
     ent = toEntity model unis

@@ -12,6 +12,8 @@ import Math.Matrix4 (..)
 import Graphics.WebGL (..)
 import Graphics.Camera (..)
 
+import Graphics.Camera as Camera
+
 
 
 {-|
@@ -39,9 +41,9 @@ Information about how to render the surface of an object.
 Eventually will support parsing of MTL files and specifying specular 
 and diffuse properties of materials, bump-maps, etc.
 -}
-data MaterialData = OneColorMaterial Vec3 | OneTextureMaterial Texture | FullMaterial Material
+data MaterialData = OneColorMaterial Vec3 | OneTextureMaterial Texture | FullMaterial Material Texture
 
-data ColorData = OneColor Vec4 | TexColor Texture
+data ColorData = OneColor Vec3 | TexColor Texture
 
 data ShadowData = NoShadows | SolidShadows
 

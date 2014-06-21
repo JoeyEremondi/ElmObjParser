@@ -7,6 +7,10 @@ import Graphics.WebGL (..)
 
 import Graphics.ObjTypes (..)
 
+import Graphics.Camera as Camera
+
+import Native.Graphics.WebGL
+
 
 basicFragShader = [glsl|
 
@@ -224,7 +228,7 @@ type FullShaderUniforms = {
     sunlightAmbient : Vec3,
     
 
-    ambientColor : Vec4,
+    ambientColor : Vec3,
     ambientTexture : Texture,
     useAmbientColor : Float,
     useAmbientTexture : Float,
@@ -243,6 +247,77 @@ type FullShaderUniforms = {
     useBumpTexture : Float
 }
 
+origin = vec3 0 0 0
+
+myLoadTex = Native.Graphics.WebGL.loadTex
+
+defaultFullUniforms : Texture -> FullShaderUniforms
+defaultFullUniforms tex = {
+    modelMatrix = identity,
+    viewMatrix = identity,
+    perspectiveMatrix = identity,
+    normalMatrix = identity,
+    
+    pointLightPosition = origin,
+    pointLightSpecular = origin,
+    pointLightDiffuse = origin,
+    pointLightAmbient = origin,
+    
+    sunlightDirection = origin,
+    sunlightSpecular = origin,
+    sunlightDiffuse = origin,
+    sunlightAmbient = origin,
+    
+    ambientColor = origin,
+    ambientTexture = tex,
+    useAmbientColor = 0.0,
+    useAmbientTexture = 0.0,
+    
+    diffuseColor = origin,
+    diffuseTexture = tex,
+    useDiffuseColor = 0.0,
+    useDiffuseTexture = 0.0,
+    
+    specularColor = origin,
+    specularTexture = tex,
+    useSpecularColor = 0.0,
+    useSpecularTexture = 0.0,
+    
+    bumpTexture  = tex,
+    useBumpTexture  = 0.0 }
+
+makeUniforms : Texture -> Material -> ObjectProperties -> GlobalProperties -> FullShaderUniforms
+makeUniforms tex matProps objProps globalProps = let
+    uni1 = defaultFullUniforms tex
+    uni2 = case matProps.baseColor of
+        OneColor c -> {uni1 | ambientColor <- c, useAmbientColor <- 1}
+        TexColor t -> {uni1 | ambientTexture <- t, useAmbientTexture <- 1}
+    uni3 = case matProps.specColor of
+        Just (OneColor c) -> {uni2 | specularColor <- c, useSpecularColor <- 1}
+        Just (TexColor t) -> {uni2 | specularTexture <- t, useSpecularTexture <- 1}
+        Nothing -> {uni2 | useSpecularColor <- 0}
+    uni4 = case matProps.diffuseColor of
+        Just (OneColor c) -> {uni3 | diffuseColor <- c, useDiffuseColor <- 1}
+        Just (TexColor t) -> {uni3 | diffuseTexture <- t, useDiffuseTexture <- 1}
+        Nothing -> uni3
+        
+    u5 = case matProps.bumpMap of
+      Nothing -> uni4
+      Just t -> {uni4 | bumpTexture <- t }
+      
+    modelMatrix = mul (makeTranslate objProps.position) <| mul (makeScale objProps.scaleFactor) (makeRotate objProps.rotation origin)
+    viewMatrix = Camera.makeView globalProps.camera
+    perspectiveMatrix = identity
+    normalMatrix = let
+            mv = mul viewMatrix modelMatrix 
+        in transpose <| inverseOrthonormal mv 
+    
+    u6 = {u5 | modelMatrix <- modelMatrix, viewMatrix <- viewMatrix, perspectiveMatrix <- perspectiveMatrix, normalMatrix <- normalMatrix }
+        
+    uFinal = u5
+  in uFinal
+    
+    
 fullVertexShader : Shader VertVTN FullShaderUniforms { vcoord : Vec3, tcoord : Vec3, vNorm : Vec3 }
 fullVertexShader = [glsl|
 
@@ -288,7 +363,7 @@ uniform vec3 sunlightDiffuse;
 uniform vec3 sunlightSpecular;
 
 
-uniform vec4 ambientColor;
+uniform vec3 ambientColor;
 uniform Sampler2D ambientTexture;
 uniform float useAmbientColor;
 uniform float useAmbientTexture;

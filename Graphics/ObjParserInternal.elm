@@ -29,6 +29,7 @@ data Model =
   | FlatTextured [Triangle VertVT] {texture : Texture}
   | SmoothColored [Triangle VertVN] {color:Vec3}
   | SmoothTextured [Triangle VertVTN] {texture : Texture}
+  | MaterialModel [Triangle VertVTN] Material Texture
   | EmptyModel
 
 
@@ -57,6 +58,7 @@ toModel objSource colorData = let
     (_, _, True, OneColorMaterial col) -> SmoothColored (map (mapTriangle toVN) triangles) {color = col}
     (False, False, False, OneTextureMaterial tex) ->  SmoothTextured (map (mapTriangle toVTN) triangles) {texture = tex}
     (False, False, False, OneColorMaterial col) ->   SmoothColored (map (mapTriangle toVN) triangles) {color = col}
+    (False, False, False, FullMaterial mat tex) -> MaterialModel (map (mapTriangle toVTN) triangles) mat tex
     _ -> FlatColored (map (mapTriangle toV) triangles) {color = vec3 0.5 0.5 0.5}
 
 toEntity : Model -> Uniforms -> Entity
@@ -67,6 +69,7 @@ toEntity model inUnis = let
       (FlatColored triangles rec) -> entity vertexShaderV fragmentShaderV triangles {uniforms | inputColor = rec.color}
       (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
       (SmoothTextured triangles rec) -> entity vertexShaderVTN fragmentShaderVTN triangles {uniforms | texture = rec.texture } --TODO fix
+      (MaterialModel triangles mat tex) -> entity fullVertexShader fullFragmentShader triangles (defaultFullUniforms tex) --TODO not default
       EmptyModel -> entity vertexShaderV fragmentShaderVN [] {uniforms | inputColor = vec3 0.0 0.0 0.0}
 
    
