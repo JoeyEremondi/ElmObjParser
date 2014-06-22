@@ -34,7 +34,8 @@ toModel = Internal.toModel
  Given an model and values for uniform variables (i.e. model transformation matrix, camera view matrix, lighting information),
  create an entity which can be rendered using `webgl`
  -}
-toEntity : Model -> Uniforms -> Entity
+ --TODO update
+toEntity : Model -> Uniforms -> ObjectProperties -> GlobalProperties -> Entity
 toEntity = Internal.toEntity
 
 {-|

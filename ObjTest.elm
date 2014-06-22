@@ -19,7 +19,7 @@ import Http
   
 -- Create the scene
 
-
+--camera : Signal (Camera.Camera)
 camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 
 --main : Signal Element
@@ -49,19 +49,32 @@ main = let
           
         in  toModel (Load.fromResponseOrFail inFile) ( FullMaterial material tex )
         _ -> emptyModel
-     ) loadStatSig inResp texResp
+     ) loadStatSig inResp texResp 
     
   
-    objProperties = {position = vec3 0 0 0,
-                rotation = 0,
-                scaleFactor = vec3 0 0 0}
+    defaultCam = Camera.defaultCamera
+    
+    theCam = {defaultCam | position <- vec3 0 0 10}
   
-  in lift2 render modelSig myUnis
+    objProperties = lift objAtTime (foldp (+) 0 (fps 30))
+                
+    globProperties = lift globalsFromCam camera
   
+  in lift4 render modelSig myUnis ( objProperties) ( globProperties)
   
-render model unis = let
+globalsFromCam : Camera.Camera -> GlobalProperties
+globalsFromCam cam = {camera = cam,
+    shadow = NoShadows,
+    screenDims = (1000, 1000)}
+    
+objAtTime t = {position = vec3 0 0 0,
+                rotation = (t / 1500),
+                scaleFactor = vec3 0.5 0.5 0.5}
+
+  
+render model unis obj glob = let
     myScene ent =  webgl (1000,1000) [ent]
-    ent = toEntity model unis
+    ent = toEntity model unis obj glob
   in myScene ent
 
 myUnis = lift3 uniformsAtTime (constant (1000,1000)) camera (foldp (+) 0 (fps 30))
@@ -71,11 +84,7 @@ uniformsAtTime dims cam t  = let
     v = view dims cam
   in { viewMatrix = v,  modelMatrix = m}
 
---Adapted from firstPerson example
-view : (Int,Int) -> Camera.Camera -> Mat4  
-view (w,h) cam = 
-    mul (makePerspective 45 (toFloat w / toFloat h) 0.01 100)
-        (makeLookAt cam.position (cam.position `add` Camera.direction cam) j)  
+view _ _  = identity
 
 modelMat : Float -> Mat4
 modelMat t = let

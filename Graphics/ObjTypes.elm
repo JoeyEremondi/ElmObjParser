@@ -67,7 +67,8 @@ type ObjectProperties = {
 
 type GlobalProperties = {
      camera : Camera,
-     shadow : ShadowData
+     shadow : ShadowData,
+     screenDims : (Int, Int)
 }
 
 {-|

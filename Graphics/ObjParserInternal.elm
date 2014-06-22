@@ -61,15 +61,17 @@ toModel objSource colorData = let
     (False, False, False, FullMaterial mat tex) -> MaterialModel (map (mapTriangle toVTN) triangles) mat tex
     _ -> FlatColored (map (mapTriangle toV) triangles) {color = vec3 0.5 0.5 0.5}
 
-toEntity : Model -> Uniforms -> Entity
-toEntity model inUnis = let
+toEntity : Model -> Uniforms -> ObjectProperties -> GlobalProperties -> Entity
+toEntity model inUnis obj glob = let
     uniforms = {inUnis | normalMatrix = normal inUnis}
   in case model of
       (SmoothColored triangles rec) -> entity vertexShaderVN fragmentShaderVN triangles {uniforms | inputColor = rec.color }
       (FlatColored triangles rec) -> entity vertexShaderV fragmentShaderV triangles {uniforms | inputColor = rec.color}
       (FlatTextured triangles rec) -> entity vertexShaderVT fragmentShaderVT triangles {uniforms | texture = rec.texture }
       (SmoothTextured triangles rec) -> entity vertexShaderVTN fragmentShaderVTN triangles {uniforms | texture = rec.texture } --TODO fix
-      (MaterialModel triangles mat tex) -> entity fullVertexShader fullFragmentShader triangles (defaultFullUniforms tex) --TODO not default
+      (MaterialModel triangles mat tex) -> let
+          fullUnis = makeUniforms tex mat obj glob
+        in entity fullVertexShader fullFragmentShader triangles fullUnis --TODO not default
       EmptyModel -> entity vertexShaderV fragmentShaderVN [] {uniforms | inputColor = vec3 0.0 0.0 0.0}
 
    

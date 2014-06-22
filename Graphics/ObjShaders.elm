@@ -286,6 +286,8 @@ defaultFullUniforms tex = {
     bumpTexture  = tex,
     useBumpTexture  = 0.0 }
 
+perspectiveForDims (w,h) = (makePerspective 45 (toFloat w / toFloat h) 0.01 100)    
+    
 makeUniforms : Texture -> Material -> ObjectProperties -> GlobalProperties -> FullShaderUniforms
 makeUniforms tex matProps objProps globalProps = let
     uni1 = defaultFullUniforms tex
@@ -305,16 +307,16 @@ makeUniforms tex matProps objProps globalProps = let
       Nothing -> uni4
       Just t -> {uni4 | bumpTexture <- t }
       
-    modelMatrix = mul (makeTranslate objProps.position) <| mul (makeScale objProps.scaleFactor) (makeRotate objProps.rotation origin)
-    viewMatrix = Camera.makeView globalProps.camera
-    perspectiveMatrix = identity
+    modelMatrix = mul (makeTranslate objProps.position) <| mul (makeScale objProps.scaleFactor) (makeRotate objProps.rotation <| vec3 0 1 0)
+    viewMatrix =  Camera.makeView globalProps.camera
+    perspectiveMatrix = perspectiveForDims globalProps.screenDims
     normalMatrix = let
             mv = mul viewMatrix modelMatrix 
         in transpose <| inverseOrthonormal mv 
     
     u6 = {u5 | modelMatrix <- modelMatrix, viewMatrix <- viewMatrix, perspectiveMatrix <- perspectiveMatrix, normalMatrix <- normalMatrix }
         
-    uFinal = u5
+    uFinal = u6
   in uFinal
     
     
@@ -326,6 +328,7 @@ attribute vec3 texCoord;
 attribute vec3 normal;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
+uniform mat4 perspectiveMatrix;
 uniform mat4 normalMatrix;
 varying vec3 vcoord;
 varying vec3 tcoord;
@@ -333,7 +336,7 @@ varying vec3 vNorm;
 
 
 void main(){
-  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);
+    gl_Position = perspectiveMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);    
   
    vcoord = gl_Position.xyz;
    tcoord = texCoord;
