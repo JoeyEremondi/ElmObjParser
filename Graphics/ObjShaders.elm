@@ -242,12 +242,14 @@ type FullShaderUniforms = {
     specularTexture : Texture,
     useSpecularColor : Float,
     useSpecularTexture : Float,
+    specularCoeff : Float,
     
     bumpTexture : Texture,
     useBumpTexture : Float
 }
 
 origin = vec3 0 0 0
+ones = vec3 1 1 1
 
 myLoadTex = Native.Graphics.WebGL.loadTex
 
@@ -258,10 +260,10 @@ defaultFullUniforms tex = {
     perspectiveMatrix = identity,
     normalMatrix = identity,
     
-    pointLightPosition = origin,
-    pointLightSpecular = origin,
-    pointLightDiffuse = origin,
-    pointLightAmbient = origin,
+    pointLightPosition = vec3 1 10 10,
+    pointLightSpecular = vec3 0.1 0.1 0.1,
+    pointLightDiffuse = ones,
+    pointLightAmbient = ones,
     
     sunlightDirection = origin,
     sunlightSpecular = origin,
@@ -283,6 +285,8 @@ defaultFullUniforms tex = {
     useSpecularColor = 0.0,
     useSpecularTexture = 0.0,
     
+    specularCoeff = 0.0,
+    
     bumpTexture  = tex,
     useBumpTexture  = 0.0 }
 
@@ -294,10 +298,10 @@ makeUniforms tex matProps objProps globalProps = let
     uni2 = case matProps.baseColor of
         OneColor c -> {uni1 | ambientColor <- c, useAmbientColor <- 1}
         TexColor t -> {uni1 | ambientTexture <- t, useAmbientTexture <- 1}
-    uni3 = case matProps.specColor of
-        Just (OneColor c) -> {uni2 | specularColor <- c, useSpecularColor <- 1}
-        Just (TexColor t) -> {uni2 | specularTexture <- t, useSpecularTexture <- 1}
-        Nothing -> {uni2 | useSpecularColor <- 0}
+    uni3 = case (matProps.specColor, matProps.specCoeff) of
+        (Just (OneColor c), Just coeff) -> {uni2 | specularColor <- c, useSpecularColor <- 1, specularCoeff <- coeff}
+        (Just (TexColor t), Just coeff) -> {uni2 | specularTexture <- t, useSpecularTexture <- 1, specularCoeff <- coeff}
+        _ -> {uni2 | useSpecularColor <- 0}
     uni4 = case matProps.diffuseColor of
         Just (OneColor c) -> {uni3 | diffuseColor <- c, useDiffuseColor <- 1}
         Just (TexColor t) -> {uni3 | diffuseTexture <- t, useDiffuseTexture <- 1}
@@ -305,7 +309,7 @@ makeUniforms tex matProps objProps globalProps = let
         
     u5 = case matProps.bumpMap of
       Nothing -> uni4
-      Just t -> {uni4 | bumpTexture <- t }
+      Just t -> {uni4 | bumpTexture <- t, useBumpTexture <- 1.0 }
       
     modelMatrix = mul (makeTranslate objProps.position) <| mul (makeScale objProps.scaleFactor) (makeRotate objProps.rotation <| vec3 0 1 0)
     viewMatrix =  Camera.makeView globalProps.camera
@@ -377,6 +381,7 @@ uniform float useSpecularColor;
 uniform float useSpecularTexture;
 uniform sampler2D bumpTexture;
 uniform float useBumpTexture;
+uniform float specularCoeff;
 varying vec3 vcoord;
 varying vec3 tcoord;
 varying vec3 vNorm;
@@ -387,7 +392,7 @@ void main () {
   // all following gemetric computations are performed in the
   // camera coordinate system (aka eye coordinates)
   //TODO normalize?
-  vec3 normal = vNorm + useBumpTexture*(texture2D(bumpTexture, tcoord.xy)).xyz;
+  vec3 normal = vNorm + (useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;
   vec3 vertPos = vcoord;
   vec3 lightDir = (pointLightPosition - vertPos);
   vec3 reflectDir = reflect(-lightDir, normal);
@@ -407,7 +412,7 @@ void main () {
   
   if(lambertian > 0.0) {
     float specAngle = max(dot(reflectDir, viewMatrixDir), 0.0);
-    specular = pow(specAngle, 0.2);
+    specular = pow(specAngle, specularCoeff);
        
     
   }

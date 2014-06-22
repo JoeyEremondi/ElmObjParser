@@ -41,10 +41,10 @@ main = let
           tex = Load.fromResponseOrFail texFile
           material = {
             baseColor = TexColor tex,
-            diffuseColor = Nothing,
-            specColor = Nothing,
-            specCoeff = Nothing,
-            bumpMap = Nothing,
+            diffuseColor = Just (OneColor <| vec3 0.1 0.1 0.1),
+            specColor = Just (OneColor <| vec3 0.1 0.1 0.1),
+            specCoeff = Just (0.5),
+            bumpMap = Just tex,
             reflectivity = Nothing }
           
         in  toModel (Load.fromResponseOrFail inFile) ( FullMaterial material tex )
@@ -69,7 +69,7 @@ globalsFromCam cam = {camera = cam,
     
 objAtTime t = {position = vec3 0 0 0,
                 rotation = (t / 1500),
-                scaleFactor = vec3 0.5 0.5 0.5}
+                scaleFactor = vec3 1 1 1}
 
   
 render model unis obj glob = let
