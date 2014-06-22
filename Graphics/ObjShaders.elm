@@ -337,52 +337,43 @@ void main(){
   
    vcoord = gl_Position.xyz;
    tcoord = texCoord;
-   vNorm = normalMatrix * normal;
-  
+   vNorm = (normalMatrix * vec4(normal, 1.0)).xyz;
+ 
+ 
 }
 
 
 |]
 
+
 fullFragmentShader : Shader {} FullShaderUniforms { vcoord:Vec3, tcoord : Vec3, vNorm : Vec3 }
 fullFragmentShader = [glsl|
 
-precision mediump float;
-uniform sampler2D ambientTexture;
-uniform mat4 normalMatrix;
-uniform vec3 pointLightPosition;
 
+precision mediump float;
+uniform mat4 normalMatrix;
 uniform vec3 pointLightPosition;
 uniform vec3 pointLightAmbient;
 uniform vec3 pointLightDiffuse;
 uniform vec3 pointLightSpecular;
-
 uniform vec3 sunlightDirection;
 uniform vec3 sunlightAmbient;
 uniform vec3 sunlightDiffuse;
 uniform vec3 sunlightSpecular;
-
-
 uniform vec3 ambientColor;
-uniform Sampler2D ambientTexture;
+uniform sampler2D ambientTexture;
 uniform float useAmbientColor;
 uniform float useAmbientTexture;
-
 uniform vec3 diffuseColor;
-uniform Sampler2D diffuseTexture;
+uniform sampler2D diffuseTexture;
 uniform float useDiffuseColor;
 uniform float useDiffuseTexture;
-
 uniform vec3 specularColor;
-uniform Sampler2D specularTexture;
+uniform sampler2D specularTexture;
 uniform float useSpecularColor;
 uniform float useSpecularTexture;
-
-uniform Sampler2D bumpTexture;
+uniform sampler2D bumpTexture;
 uniform float useBumpTexture;
-
-
-
 varying vec3 vcoord;
 varying vec3 tcoord;
 varying vec3 vNorm;
@@ -392,22 +383,23 @@ void main () {
 
   // all following gemetric computations are performed in the
   // camera coordinate system (aka eye coordinates)
-  vec3 normal = vNorm + useBumpTexture*normalize(texture2D(bumpTexture, tcoord.xy));
+  //TODO normalize?
+  vec3 normal = vNorm + useBumpTexture*(texture2D(bumpTexture, tcoord.xy)).xyz;
   vec3 vertPos = vcoord;
   vec3 lightDir = (pointLightPosition - vertPos);
   vec3 reflectDir = reflect(-lightDir, normal);
   vec3 viewMatrixDir = (-vertPos);
   
-  vec3 base = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy));
+  vec3 base = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy).xyz);
   
-  vec3 diff = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy));
+  vec3 diff = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy).xyz);
   
-  vec3 spec = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy));
+  vec3 spec = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy).xyz);
   
-  vec3 diffuseColor = 0.25*texture2D(texture, tcoord.xy).xyz;
-  vec3 ambientColor = 1.5*diffuseColor;
+  //vec3 diffuseColor = 0.25*texture2D(diffuseTexture, tcoord.xy).xyz;
+  //vec3 ambientColor = 1.5*diffuseColor;
 
-  float lambertian = max(dot(lightDir,adjustedNormal), 0.0);
+  float lambertian = max(dot(lightDir,vNorm), 0.0);
   float specular = 0.0;
   
   if(lambertian > 0.0) {
@@ -416,7 +408,7 @@ void main () {
        
     
   }
-  gl_FragColor = vec4((lambertian*diffuseColor + specular*specColor) + ambientColor, 1.0);
+  gl_FragColor = vec4((lambertian*diff + specular*spec) + base, 1.0);
 
 
 
