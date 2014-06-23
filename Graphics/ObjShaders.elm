@@ -220,18 +220,14 @@ type FullShaderUniforms = {
     pointLightPosition : Vec3,
     pointLightSpecular : Vec3,
     pointLightDiffuse : Vec3,
-    pointLightAmbient : Vec3,
-    
-    sunlightDirection : Vec3,
-    sunlightSpecular : Vec3,
-    sunlightDiffuse : Vec3,
-    sunlightAmbient : Vec3,
-    
+
+    globalAmbient : Vec3,
 
     ambientColor : Vec3,
     ambientTexture : Texture,
     useAmbientColor : Float,
     useAmbientTexture : Float,
+    
     
     diffuseColor : Vec3,
     diffuseTexture : Texture,
@@ -263,12 +259,8 @@ defaultFullUniforms tex = {
     pointLightPosition = vec3 1 10 10,
     pointLightSpecular = vec3 0.1 0.1 0.1,
     pointLightDiffuse = ones,
-    pointLightAmbient = ones,
-    
-    sunlightDirection = origin,
-    sunlightSpecular = origin,
-    sunlightDiffuse = origin,
-    sunlightAmbient = origin,
+    globalAmbient = vec3 0.3 0.3 0.3,
+
     
     ambientColor = origin,
     ambientTexture = tex,
@@ -359,28 +351,32 @@ fullFragmentShader = [glsl|
 
 precision mediump float;
 uniform mat4 normalMatrix;
+
 uniform vec3 pointLightPosition;
-uniform vec3 pointLightAmbient;
 uniform vec3 pointLightDiffuse;
 uniform vec3 pointLightSpecular;
-uniform vec3 sunlightDirection;
-uniform vec3 sunlightAmbient;
-uniform vec3 sunlightDiffuse;
-uniform vec3 sunlightSpecular;
+
+
+uniform vec3 globalAmbient;
+
 uniform vec3 ambientColor;
 uniform sampler2D ambientTexture;
 uniform float useAmbientColor;
 uniform float useAmbientTexture;
+
 uniform vec3 diffuseColor;
 uniform sampler2D diffuseTexture;
 uniform float useDiffuseColor;
 uniform float useDiffuseTexture;
+
 uniform vec3 specularColor;
 uniform sampler2D specularTexture;
 uniform float useSpecularColor;
 uniform float useSpecularTexture;
+
 uniform sampler2D bumpTexture;
 uniform float useBumpTexture;
+
 uniform float specularCoeff;
 varying vec3 vcoord;
 varying vec3 tcoord;
@@ -392,7 +388,7 @@ void main () {
   // all following gemetric computations are performed in the
   // camera coordinate system (aka eye coordinates)
   //TODO normalize?
-  vec3 normal = vNorm + (useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;
+  vec3 normal = vNorm + (10.0*useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;
   vec3 vertPos = vcoord;
   vec3 lightDir = (pointLightPosition - vertPos);
   vec3 reflectDir = reflect(-lightDir, normal);
@@ -404,8 +400,6 @@ void main () {
   
   vec3 spec = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy).xyz);
   
-  //vec3 diffuseColor = 0.25*texture2D(diffuseTexture, tcoord.xy).xyz;
-  //vec3 ambientColor = 1.5*diffuseColor;
 
   float lambertian = max(dot(lightDir,vNorm), 0.0);
   float specular = 0.0;

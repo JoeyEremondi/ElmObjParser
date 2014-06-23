@@ -29,27 +29,30 @@ camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 main = let
     inResp = Http.sendGet <| constant "/capsule.obj"
     texResp = loadTexture "/capsule0.jpg"
+    bumpResp = loadTexture "/Orange-bumpmap.png"
     inAsset = lift Load.toAsset inResp
-    texAsset = lift Load.toAsset inResp
-    assets = combine [inAsset, texAsset]
+    texAsset = lift Load.toAsset texResp
+    bumpAsset = lift Load.toAsset bumpResp
+    assets = combine [inAsset, texAsset, bumpAsset]
     loadStatSig = lift Load.toStatus assets
     
 
-    modelSig = lift3
-     (\loadStatSig inFile texFile -> case loadStatSig of
+    modelSig = lift4
+     (\loadStatSig inFile texFile bumpFile -> case loadStatSig of
         Load.Complete -> let
           tex = Load.fromResponseOrFail texFile
+          bump = Load.fromResponseOrFail bumpFile
           material = {
             baseColor = TexColor tex,
             diffuseColor = Just (OneColor <| vec3 0.1 0.1 0.1),
             specColor = Just (OneColor <| vec3 0.1 0.1 0.1),
             specCoeff = Just (0.5),
-            bumpMap = Just tex,
+            bumpMap = Just bump,
             reflectivity = Nothing }
           
         in  toModel (Load.fromResponseOrFail inFile) ( FullMaterial material tex )
         _ -> emptyModel
-     ) loadStatSig inResp texResp 
+     ) loadStatSig inResp texResp bumpResp
     
   
     defaultCam = Camera.defaultCamera
