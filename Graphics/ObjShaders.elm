@@ -258,7 +258,7 @@ defaultFullUniforms tex = {
     
     pointLightPosition = vec3 1 10 10,
     pointLightSpecular = vec3 0.1 0.1 0.1,
-    pointLightDiffuse = ones,
+    pointLightDiffuse = vec3 0.1 0.1 0.1,
     globalAmbient = vec3 0.3 0.3 0.3,
 
     
@@ -316,27 +316,44 @@ makeUniforms tex matProps objProps globalProps = let
   in uFinal
     
     
-fullVertexShader : Shader VertVTN FullShaderUniforms { vcoord : Vec3, tcoord : Vec3, vNorm : Vec3 }
+fullVertexShader : Shader VertVTN FullShaderUniforms { vcoord : Vec3, tcoord : Vec3, vNorm : Vec3, lightVec : Vec3 }
 fullVertexShader = [glsl|
+
+precision lowp float;
 
 attribute vec3 position;
 attribute vec3 texCoord;
 attribute vec3 normal;
+
+uniform vec3 pointLightPosition;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 perspectiveMatrix;
 uniform mat4 normalMatrix;
+
 varying vec3 vcoord;
 varying vec3 tcoord;
 varying vec3 vNorm;
+varying vec3 lightVec;
 
 
+
+//Based off http://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SIXTH_EDITION/CODE/CHAPTER05/WINDOWS_VERSIONS/vshader56.glsl
 void main(){
     gl_Position = perspectiveMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);    
   
-   vcoord = gl_Position.xyz;
+   vcoord = (viewMatrix * modelMatrix * vec4(position, 1.0)).xyz;
    tcoord = texCoord;
    vNorm = (normalMatrix * vec4(normal, 1.0)).xyz;
+   if (1.0 == 0.0)
+   {
+	lightVec = pointLightPosition.xyz;
+   }
+   else
+   {
+     lightVec = (pointLightPosition.xyz - vcoord);
+   }
+   //lightVec =  (1.0-pointLightPosition.w) * pointLightPosition.xyz + (pointLightPosition.w)*(pointLightPosition.xyz - vcoord);
  
  
 }
@@ -345,11 +362,11 @@ void main(){
 |]
 
 
-fullFragmentShader : Shader {} FullShaderUniforms { vcoord:Vec3, tcoord : Vec3, vNorm : Vec3 }
+fullFragmentShader : Shader {} FullShaderUniforms { vcoord:Vec3, tcoord : Vec3, vNorm : Vec3, lightVec : Vec3 }
 fullFragmentShader = [glsl|
 
 
-precision mediump float;
+precision lowp float;
 uniform mat4 normalMatrix;
 
 uniform vec3 pointLightPosition;
@@ -381,6 +398,7 @@ uniform float specularCoeff;
 varying vec3 vcoord;
 varying vec3 tcoord;
 varying vec3 vNorm;
+varying vec3 lightVec;
 
 
 void main () {
@@ -388,20 +406,24 @@ void main () {
   // all following gemetric computations are performed in the
   // camera coordinate system (aka eye coordinates)
   //TODO normalize?
-  vec3 normal = vNorm + (10.0*useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;
+  vec3 lightDirection = normalize(lightVec);
+  vec3 normal = normalize(vNorm) + (1.0*useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;
   vec3 vertPos = vcoord;
-  vec3 lightDir = (pointLightPosition - vertPos);
-  vec3 reflectDir = reflect(-lightDir, normal);
+  vec3 reflectDir = reflect(-lightDirection, normal);
   vec3 viewMatrixDir = (-vertPos);
   
-  vec3 base = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy).xyz);
+  vec3 materialBase = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy).xyz);
   
-  vec3 diff = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy).xyz);
+  vec3 materialDiffuse = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy).xyz);
   
-  vec3 spec = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy).xyz);
+  vec3 materialSpecular = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy).xyz);
+  
+  vec3 base = globalAmbient * materialBase;
+  vec3 diff = pointLightDiffuse * materialDiffuse;
+  vec3 spec = pointLightSpecular * materialSpecular;
   
 
-  float lambertian = max(dot(lightDir,vNorm), 0.0);
+  float lambertian = max(dot(lightDirection,vNorm), 0.0);
   float specular = 0.0;
   
   if(lambertian > 0.0) {

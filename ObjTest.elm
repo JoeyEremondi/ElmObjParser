@@ -44,9 +44,9 @@ main = let
           bump = Load.fromResponseOrFail bumpFile
           material = {
             baseColor = TexColor tex,
-            diffuseColor = Just (OneColor <| vec3 0.1 0.1 0.1),
+            diffuseColor = Just (OneColor <| vec3 0.4 0.4 0.4),
             specColor = Just (OneColor <| vec3 0.1 0.1 0.1),
-            specCoeff = Just (0.5),
+            specCoeff = Just (0.8),
             bumpMap = Just bump,
             reflectivity = Nothing }
           

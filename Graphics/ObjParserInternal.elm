@@ -36,7 +36,7 @@ data Model =
  --Normal matrix calculations for a given uniform
 normal unis = let
      mv = mul unis.viewMatrix unis.modelMatrix 
-  in transpose <| inverseOrthonormal mv 
+  in transpose <| inverseOrthonormal unis.modelMatrix  
 
 
 
