@@ -10,10 +10,11 @@ env:
 install: 
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm-get
+- wget http://JoeyEremondi.github.io/elm-travis-cache/elm_home.tar.gz
 - chmod +x ./elm
 - chmod +x ./elm-get
 - mkdir elm-home
-- ELM_HOME=./elm-home
+- tar -czf elm-home elm_home.tar.gz
 - ./elm-get install johnpmayer/elm-linear-algebra
 - ./elm-get install johnpmayer/elm-webgl
 before_script:
