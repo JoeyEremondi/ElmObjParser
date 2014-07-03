@@ -5,7 +5,7 @@ env:
   global:
   - secure: BeurG3Cuee3lNmRclebXKHAAkPhhXgzNOUpOMl1INLnEtXQ52ZIzyDzeiUA32AIvi3/ICOEOSpiDxI1XWIW9KmJPDjtlImAA6VMe5DLHAwBQYqve/T4NH+jPVyShOoc4RCeevpzThDkzFY08CaamXrnDCqzyItCD/OndJgoZ7Ko=
   - secure: CIK/eqhPHiSVUoOHzm2Rxl7Rg+TozfWD5XkD91uZd1hXN3AlKUae0/3lqRVnyxILPY286TTCuLa84LSvWmirvfximNsRxU4d8TzX3bMM2PlNQYdQoczy+TySiM250d5aq+MP8Lg8joEfsOXJDDvoYEZxvkEzvSJoVWh48QSoDtI=
-install:
+install: 
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm-get
 - chmod +x ./elm
