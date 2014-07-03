@@ -1,0 +1,30 @@
+branches:
+  only:
+  - master
+env:
+  global:
+  - secure: BeurG3Cuee3lNmRclebXKHAAkPhhXgzNOUpOMl1INLnEtXQ52ZIzyDzeiUA32AIvi3/ICOEOSpiDxI1XWIW9KmJPDjtlImAA6VMe5DLHAwBQYqve/T4NH+jPVyShOoc4RCeevpzThDkzFY08CaamXrnDCqzyItCD/OndJgoZ7Ko=
+  - secure: CIK/eqhPHiSVUoOHzm2Rxl7Rg+TozfWD5XkD91uZd1hXN3AlKUae0/3lqRVnyxILPY286TTCuLa84LSvWmirvfximNsRxU4d8TzX3bMM2PlNQYdQoczy+TySiM250d5aq+MP8Lg8joEfsOXJDDvoYEZxvkEzvSJoVWh48QSoDtI=
+install:
+- wget http://JoeyEremondi.github.io/elm-travis-cache/elm
+- wget http://JoeyEremondi.github.io/elm-travis-cache/elm-get
+- chmod +x ./elm
+- chmod +x ./elm-get
+- ./elm-get install johnpmayer/elm-linear-algebra
+- ./elm-get install johnpmayer/elm-webgl
+before_script:
+- cd build
+- git checkout gh-pages
+- git pull
+- cd ..
+script: ./elm --make ObjTest.elm
+after_script:
+- cd build
+- git status
+- git config --global user.email "joey@eremondi.com"
+- git config --global user.name "JoeyEremondi"
+- git add --all
+- git commit -m "snapshot $(date '+%m/%d/%y %H:%M')"
+- git push "https://""$GH_KEY""@github.com/JoeyEremondi/ElmObjParser.git"  gh-pages
+  >/dev/null 2>&1
+- cd ..
