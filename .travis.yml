@@ -21,7 +21,7 @@ before_script:
 - git checkout gh-pages
 - git pull
 - cd ..
-script: ./elm --make ObjTest.elm
+script: ./elm --make --set-runtime="http://eremondi.com/elm-travis-cache/elm-runtime.js" ObjTest.elm 
 after_script:
 - cd build
 - git status
