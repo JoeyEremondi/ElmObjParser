@@ -25,6 +25,7 @@ script:
  - ./elm --make --set-runtime="http://eremondi.com/elm-travis-cache/elm-runtime.js" ObjTest.elm 
  - yes | cp ./*.jpg ./build
  - yes | cp ./*.png ./build
+ - yes | cp ./*.obj ./build
 after_script:
 - cd build
 - git status
