@@ -27,9 +27,9 @@ camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
 
 
 main = let
-    inResp = Http.sendGet <| constant "/capsule.obj"
-    texResp = loadTexture "/capsule0.jpg"
-    bumpResp = loadTexture "/Orange-bumpmap.png"
+    inResp = Http.sendGet <| constant "capsule.obj"
+    texResp = loadTexture "capsule0.jpg"
+    bumpResp = loadTexture "Orange-bumpmap.png"
     inAsset = lift Load.toAsset inResp
     texAsset = lift Load.toAsset texResp
     bumpAsset = lift Load.toAsset bumpResp
