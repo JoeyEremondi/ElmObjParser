@@ -2721,15 +2721,15 @@ Elm.ObjTest.make = function (_elm) {
       var theCam = _U.replace([["position"
                                ,A3(Math.Vector3.vec3,0,0,10)]],
       defaultCam);
-      var bumpResp = Graphics.WebGL.loadTexture("/Orange-bumpmap.png");
+      var bumpResp = Graphics.WebGL.loadTexture("Orange-bumpmap.png");
       var bumpAsset = A2(Signal.lift,
       LoadAssets.toAsset,
       bumpResp);
-      var texResp = Graphics.WebGL.loadTexture("/capsule0.jpg");
+      var texResp = Graphics.WebGL.loadTexture("capsule0.jpg");
       var texAsset = A2(Signal.lift,
       LoadAssets.toAsset,
       texResp);
-      var inResp = Http.sendGet(Signal.constant("/capsule.obj"));
+      var inResp = Http.sendGet(Signal.constant("capsule.obj"));
       var inAsset = A2(Signal.lift,
       LoadAssets.toAsset,
       inResp);
