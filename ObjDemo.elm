@@ -6,42 +6,53 @@ import Graphics.WebGL (loadTexture, Texture)
 import LoadAssets as Load
 import Http
 
+--User picks from a list, is either
+data TexChoice = SolidColor Color | TexturePath String
+
 
 main : Signal Element
-main = lift display style.signal
+main = let
+    elem = lift2 display remoteAssets style.signal
+  in elem
 
-style : Input String
+style : Input TexChoice
 style = input <| snd <| head colorOptions
 
-display : String -> Element
-display s =
-  let msg = toText "Choose a style for the following text: " in
-   flow down [  dropDown style.handle colorOptions, plainText s]
+--display : String -> Element
+display (status, texDict, modelDict) texChoice = case status of
+   Load.Complete -> let msg = "Objects loaded"
+     in flow down [plainText msg,  dropDown style.handle colorOptions, plainText <| show texChoice]
+   Load.InProgress f -> plainText <| "Remote assets " ++ (show <| 100*f) ++ "% loaded"
+   Load.Failed errors -> plainText <| "Error loading assets: " ++ (show errors)
             
 
-colorOptions : [(String, String)]
-colorOptions = [ ("black"    , "black.jpg")
-          , ("orange", "orange.jpg")
-          , ("grid", "grid.jpg")
-          , ("stripes", "stripes.jpg")
-          , ("camo", "camo.jpg")
-          , ("brick", "brick.jpg")
+colorOptions : [(String, TexChoice)]
+colorOptions = [ 
+          ("orange", TexturePath "orange.png")
+          , ("grid", TexturePath "capsule0.jpg")
 
           ]
           
 modelOptions : [(String, String)]
 modelOptions = [ ("bunny"    , "bunny.obj")
-          , ("dragon", "dragon.obj")
           , ("capsule", "capsule.obj")
 
 
           ]
 
-pair x y = (x,y)          
+pair x y = (x,y)
+
+
+textureNames = let
+    isTex choice = case choice of
+      TexturePath _ -> True
+      _ -> False
+    toPath (TexturePath s) = s
+  in map toPath <| filter isTex <| map snd colorOptions
+  
           
---textureDict : Signal (Load.Status, Dict.Dict String Texture)
-textureDict = let
-    textureNames = map snd colorOptions
+remoteAssets : Signal (Load.Status, Dict.Dict String Texture, Dict.Dict String String)
+remoteAssets = let
     texRespSigs = map loadTexture textureNames
     texRespListSig = combine texRespSigs
     
@@ -51,8 +62,18 @@ textureDict = let
     
     makeStatus texResps modelResps = Load.toStatus <| (map Load.toAsset texResps) ++ (map Load.toAsset modelResps)
     statusSig = lift2 makeStatus texRespListSig modRespListSig
+    
+    makeDicts texResps modelResps status = case status of
+        Load.Complete -> let
+            textures = map Load.fromResponseOrFail texResps
+            models = map Load.fromResponseOrFail modelResps
+            texDict = Dict.fromList <| zip textureNames textures
+            modelDict = Dict.fromList <| zip modelNames models
+          in  (Load.Complete, texDict, modelDict)
+        status -> (status, Dict.empty, Dict.empty)
+        
 
     
     
-  in lift2 pair (constant Load.Complete) (constant Dict.empty)
+  in lift3 makeDicts texRespListSig modRespListSig statusSig
 
