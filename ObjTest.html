@@ -2683,7 +2683,24 @@ Elm.ObjTest.make = function (_elm) {
    };
    var globalsFromCam = function (cam) {
       return {_: {}
+             ,ambientLight: A3(Math.Vector3.vec3,
+             0.3,
+             0.3,
+             0.3)
              ,camera: cam
+             ,mainLight: Graphics.ObjTypes.PointLight({_: {}
+                                                      ,diffuse: A3(Math.Vector3.vec3,
+                                                      0.1,
+                                                      0.1,
+                                                      0.1)
+                                                      ,pos: A3(Math.Vector3.vec3,
+                                                      1,
+                                                      10,
+                                                      10)
+                                                      ,specular: A3(Math.Vector3.vec3,
+                                                      0.1,
+                                                      0.1,
+                                                      0.1)})
              ,screenDims: {ctor: "_Tuple2"
                           ,_0: 1000
                           ,_1: 1000}
@@ -3669,25 +3686,13 @@ Elm.Graphics.ObjShaders.make = function (_elm) {
              ,bumpTexture: tex
              ,diffuseColor: origin
              ,diffuseTexture: tex
-             ,globalAmbient: A3(Math.Vector3.vec3,
-             0.3,
-             0.3,
-             0.3)
+             ,globalAmbient: ones
              ,modelMatrix: Math.Matrix4.identity
              ,normalMatrix: Math.Matrix4.identity
              ,perspectiveMatrix: Math.Matrix4.identity
-             ,pointLightDiffuse: A3(Math.Vector3.vec3,
-             0.1,
-             0.1,
-             0.1)
-             ,pointLightPosition: A3(Math.Vector3.vec3,
-             1,
-             10,
-             10)
-             ,pointLightSpecular: A3(Math.Vector3.vec3,
-             0.1,
-             0.1,
-             0.1)
+             ,pointLightDiffuse: origin
+             ,pointLightPosition: origin
+             ,pointLightSpecular: origin
              ,specularCoeff: 0.0
              ,specularColor: origin
              ,specularTexture: tex
@@ -3808,7 +3813,24 @@ Elm.Graphics.ObjShaders.make = function (_elm) {
                               ,perspectiveMatrix]
                              ,["normalMatrix",normalMatrix]],
          u5);
-         var uFinal = u6;
+         var u7 = _U.insert("globalAmbient",
+         globalProps.ambientLight,
+         u6);
+         var u8 = function () {
+            var _v21 = globalProps.mainLight;
+            switch (_v21.ctor)
+            {case "PointLight":
+               return _U.replace([["pointLightPosition"
+                                  ,_v21._0.pos]
+                                 ,["pointLightSpecular"
+                                  ,_v21._0.specular]
+                                 ,["pointLightDiffuse"
+                                  ,_v21._0.diffuse]],
+                 u7);}
+            _E.Case($moduleName,
+            "between lines 317 and 321");
+         }();
+         var uFinal = u8;
          return uFinal;
       }();
    });
@@ -3959,11 +3981,15 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
              ,modelMatrix: b
              ,viewMatrix: a};
    });
-   var GlobalProperties = F3(function (a,
+   var GlobalProperties = F5(function (a,
    b,
-   c) {
+   c,
+   d,
+   e) {
       return {_: {}
+             ,ambientLight: d
              ,camera: a
+             ,mainLight: e
              ,screenDims: c
              ,shadow: b};
    });
@@ -3989,6 +4015,14 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
              ,specCoeff: d
              ,specColor: c};
    });
+   var SunLight = function (a) {
+      return {ctor: "SunLight"
+             ,_0: a};
+   };
+   var PointLight = function (a) {
+      return {ctor: "PointLight"
+             ,_0: a};
+   };
    var Ortho = {ctor: "Ortho"};
    var Perspective = {ctor: "Perspective"};
    var SolidShadows = {ctor: "SolidShadows"};
@@ -4046,6 +4080,8 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
                                    ,SolidShadows: SolidShadows
                                    ,Perspective: Perspective
                                    ,Ortho: Ortho
+                                   ,PointLight: PointLight
+                                   ,SunLight: SunLight
                                    ,VertV: VertV
                                    ,VertVT: VertVT
                                    ,VertVN: VertVN
