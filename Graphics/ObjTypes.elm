@@ -49,6 +49,10 @@ data ShadowData = NoShadows | SolidShadows
 
 data ProjectionType = Perspective | Ortho
 
+data LightSource = 
+    PointLight {pos:Vec3, specular:Vec3, diffuse:Vec3}
+  | SunLight {direction:Vec3, specular:Vec3, diffuse:Vec3}
+
 type Material = {
     baseColor : ColorData,
     diffuseColor : Maybe ColorData,
@@ -68,7 +72,9 @@ type ObjectProperties = {
 type GlobalProperties = {
      camera : Camera,
      shadow : ShadowData,
-     screenDims : (Int, Int)
+     screenDims : (Int, Int),
+     ambientLight : Vec3,
+     mainLight : LightSource
 }
 
 {-|

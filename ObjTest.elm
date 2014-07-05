@@ -68,7 +68,12 @@ main = let
 globalsFromCam : Camera.Camera -> GlobalProperties
 globalsFromCam cam = {camera = cam,
     shadow = NoShadows,
-    screenDims = (1000, 1000)}
+    screenDims = (1000, 1000),
+    ambientLight = vec3 0.3 0.3 0.3,
+    mainLight = 
+        PointLight {pos = vec3 1 10 10,
+                    specular = vec3 0.1 0.1 0.1,
+                    diffuse = vec3 0.1 0.1 0.1}}
     
 objAtTime t = {position = vec3 0 0 0,
                 rotation = (t / 1500),

@@ -256,10 +256,10 @@ defaultFullUniforms tex = {
     perspectiveMatrix = identity,
     normalMatrix = identity,
     
-    pointLightPosition = vec3 1 10 10,
-    pointLightSpecular = vec3 0.1 0.1 0.1,
-    pointLightDiffuse = vec3 0.1 0.1 0.1,
-    globalAmbient = vec3 0.3 0.3 0.3,
+    pointLightPosition = origin,
+    pointLightSpecular = origin,
+    pointLightDiffuse = origin,
+    globalAmbient = ones,
 
     
     ambientColor = origin,
@@ -311,8 +311,14 @@ makeUniforms tex matProps objProps globalProps = let
         in transpose <| inverseOrthonormal mv 
     
     u6 = {u5 | modelMatrix <- modelMatrix, viewMatrix <- viewMatrix, perspectiveMatrix <- perspectiveMatrix, normalMatrix <- normalMatrix }
+    
+    --Set global lighting properties
+    u7 = {u6 | globalAmbient = globalProps.ambientLight}
+    u8 = case globalProps.mainLight of
+        PointLight light -> {u7 | pointLightPosition <- light.pos, pointLightSpecular <- light.specular, pointLightDiffuse <- light.diffuse}
+        --TODO sunlight
         
-    uFinal = u6
+    uFinal = u8
   in uFinal
     
     
