@@ -28,7 +28,7 @@ display (status, texDict, modelDict) texChoice = case status of
 
 colorOptions : [(String, TexChoice)]
 colorOptions = [ 
-          ("orange", TexturePath "orange.png")
+          ("orange", TexturePath "Orange-bumpmap.png")
           , ("grid", TexturePath "capsule0.jpg")
 
           ]
