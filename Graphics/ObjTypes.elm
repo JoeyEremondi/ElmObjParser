@@ -43,16 +43,40 @@ and diffuse properties of materials, bump-maps, etc.
 -}
 data MaterialData = OneColorMaterial Vec3 | OneTextureMaterial Texture | FullMaterial Material Texture
 
+{-|
+Data type for the coloring of a material.
+A material either has a solid color, or samples its color from some texture
+-}
 data ColorData = OneColor Vec3 | TexColor Texture
 
+{-|
+Specifies what kind of shadow to render in a scene.
+Currently ignored.
+-}
 data ShadowData = NoShadows | SolidShadows
 
+{-|
+Specifies what type of projection should be used to convert the 3d scene into a 2d image.
+Perspective is the usual choice for 3d scenes.
+-}
+--TODO support ortho
 data ProjectionType = Perspective | Ortho
 
+{-|
+Specify information about a light source.
+A light source can be at a particular point in space,
+or extremely far away (such as a sun).
+-}
 data LightSource = 
     PointLight {pos:Vec3, specular:Vec3, diffuse:Vec3}
   | SunLight {direction:Vec3, specular:Vec3, diffuse:Vec3}
 
+{-|
+The material properties of an object, specifying its color properties,
+and bumpiness.
+Reflectivity is currently ignored.
+For performance reasons, these values should be pre-computed, not altered every frame.
+-}
 type Material = {
     baseColor : ColorData,
     diffuseColor : Maybe ColorData,
@@ -63,12 +87,21 @@ type Material = {
     reflectivity : Maybe Float
 }
 
+{-|
+Specifies the spatial properties of an object to be rendered.
+These values could be altered every frame using signals,
+allowing for animation.
+-}
 type ObjectProperties = {
     position : Vec3,
     rotation : Float,
     scaleFactor : Vec3
 }
 
+{-|
+The properties of the environment in which a scene is rendered.
+It is generally reccomended to have some ambient light, so that the scene is visible.
+-}
 type GlobalProperties = {
      camera : Camera,
      shadow : ShadowData,

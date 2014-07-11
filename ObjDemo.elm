@@ -12,11 +12,34 @@ data TexChoice = SolidColor Color | TexturePath String
 
 main : Signal Element
 main = let
-    elem = lift2 display remoteAssets style.signal
+    elem = lift makeElems inputSig
   in elem
 
 style : Input TexChoice
 style = input <| snd <| head colorOptions
+
+theInput = { texture = input <| SolidColor black,
+    model = input <| "capsule.obj"
+    }
+
+inputSig = let
+        liftInput tex mod = {
+            texture = tex,
+            model = mod
+        }
+    in liftInput <~ theInput.texture.signal ~ theInput.model.signal
+
+
+makeElems inputValues = flow down [
+     dropDown theInput.texture.handle colorOptions,
+     dropDown theInput.model.handle modelOptions,
+     plainText <| show inputValues.texture,
+     plainText <| show inputValues.model
+    ]
+    
+makeVars inputValues = {
+
+}
 
 --display : String -> Element
 display (status, texDict, modelDict) texChoice = case status of

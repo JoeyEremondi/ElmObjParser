@@ -209,7 +209,8 @@ void main () {
 |]
 
 
-
+--The large set of data that gets passed to the "full" shader
+-- which supports bump-maps, texture maps, etc.
 type FullShaderUniforms = {
 
     modelMatrix : Mat4,
@@ -244,11 +245,13 @@ type FullShaderUniforms = {
     useBumpTexture : Float
 }
 
+--Conventient helpers for default values
 origin = vec3 0 0 0
 ones = vec3 1 1 1
 
-myLoadTex = Native.Graphics.WebGL.loadTex
-
+--Basic default values, so we have a starting point for building a record
+--Important since every field needs a value, but some aren't always given
+--i.e. only given diffuse color or texture, not both
 defaultFullUniforms : Texture -> FullShaderUniforms
 defaultFullUniforms tex = {
     modelMatrix = identity,
@@ -282,8 +285,11 @@ defaultFullUniforms tex = {
     bumpTexture  = tex,
     useBumpTexture  = 0.0 }
 
+--Given screen dimensions, make the appropriate perspective matrix
 perspectiveForDims (w,h) = (makePerspective 45 (toFloat w / toFloat h) 0.01 100)    
     
+--Given a default texture, material properties, and high level obj/global properties,
+--Convert these values into the form read by the shader
 makeUniforms : Texture -> Material -> ObjectProperties -> GlobalProperties -> FullShaderUniforms
 makeUniforms tex matProps objProps globalProps = let
     uni1 = defaultFullUniforms tex
@@ -321,7 +327,8 @@ makeUniforms tex matProps objProps globalProps = let
     uFinal = u8
   in uFinal
     
-    
+--Version of the shader supporting textures for amb, spec and diff, as well as bump maps
+--Allows for one light    
 fullVertexShader : Shader VertVTN FullShaderUniforms { vcoord : Vec3, tcoord : Vec3, vNorm : Vec3, lightVec : Vec3 }
 fullVertexShader = [glsl|
 
