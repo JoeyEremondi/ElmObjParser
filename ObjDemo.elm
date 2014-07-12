@@ -38,8 +38,8 @@ makeElems inputValues = flow down [
     ]
     
 makeVars inputValues = {
-
-}
+    x = 3
+    }
 
 --display : String -> Element
 display (status, texDict, modelDict) texChoice = case status of
