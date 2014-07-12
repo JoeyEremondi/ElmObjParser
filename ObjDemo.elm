@@ -3,13 +3,36 @@ import Text
 import Dict
 import Graphics.WebGL (loadTexture, Texture)
 
+import Graphics.ObjParser as Obj
+
+import Graphics.ObjTypes (..)
+import Math.Vector3 (..)
+import Math.Matrix4 (..)
+import Graphics.WebGL (..)
+
+import Graphics.Camera as Camera
+
 import LoadAssets as Load
 import Http
 
 --User picks from a list, is either
 data TexChoice = SolidColor Color | TexturePath String
 
+globalsFromCam : Camera.Camera -> GlobalProperties
+globalsFromCam cam = {camera = cam,
+    shadow = NoShadows,
+    screenDims = (1000, 1000),
+    ambientLight = vec3 0.3 0.3 0.3,
+    mainLight = 
+        PointLight {pos = vec3 1 10 10,
+                    specular = vec3 0.1 0.1 0.1,
+                    diffuse = vec3 0.1 0.1 0.1}}
 
+render model obj glob = let
+    myScene ent =  webgl (1000,1000) [ent]
+    ent = Obj.toEntity model  obj glob
+  in myScene ent                    
+                    
 main : Signal Element
 main = let
     elem = lift makeElems inputSig

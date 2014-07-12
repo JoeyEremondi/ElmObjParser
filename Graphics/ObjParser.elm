@@ -35,7 +35,7 @@ toModel = Internal.toModel
  create an entity which can be rendered using `webgl`
  -}
  --TODO update
-toEntity : Model -> Uniforms -> ObjectProperties -> GlobalProperties -> Entity
+toEntity : Model -> ObjectProperties -> GlobalProperties -> Entity
 toEntity = Internal.toEntity
 
 {-|
