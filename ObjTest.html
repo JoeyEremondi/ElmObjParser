@@ -2743,7 +2743,7 @@ Elm.ObjTest.make = function (_elm) {
                                0.0))]],
               cam);}
          _E.Case($moduleName,
-         "between lines 121 and 125");
+         "between lines 35 and 37");
       }();
    });
    var camera = A3(Signal.foldp,
@@ -2842,6 +2842,7 @@ Elm.ObjTest.make = function (_elm) {
    }();
    _elm.ObjTest.values = {_op: _op
                          ,inputs: inputs
+                         ,stepCam: stepCam
                          ,camera: camera
                          ,main: main
                          ,globalsFromCam: globalsFromCam
@@ -2851,7 +2852,6 @@ Elm.ObjTest.make = function (_elm) {
                          ,uniformsAtTime: uniformsAtTime
                          ,view: view
                          ,modelMat: modelMat
-                         ,stepCam: stepCam
                          ,TimeDelta: TimeDelta};
    return _elm.ObjTest.values;
 };Elm.Graphics = Elm.Graphics || {};
