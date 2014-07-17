@@ -2602,6 +2602,7 @@ Elm.ObjTest.make = function (_elm) {
    var Graphics = Graphics || {};
    Graphics.WebGL = Elm.Graphics.WebGL.make(_elm);
    var Http = Elm.Http.make(_elm);
+   var Keyboard = Elm.Keyboard.make(_elm);
    var List = Elm.List.make(_elm);
    var LoadAssets = Elm.LoadAssets.make(_elm);
    var Math = Math || {};
@@ -2609,6 +2610,7 @@ Elm.ObjTest.make = function (_elm) {
    var Math = Math || {};
    Math.Vector3 = Elm.Math.Vector3.make(_elm);
    var Maybe = Elm.Maybe.make(_elm);
+   var Mouse = Elm.Mouse.make(_elm);
    var Native = Native || {};
    Native.Json = Elm.Native.Json.make(_elm);
    var Native = Native || {};
@@ -2617,6 +2619,7 @@ Elm.ObjTest.make = function (_elm) {
    var String = Elm.String.make(_elm);
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
+   var Window = Elm.Window.make(_elm);
    var _op = {};
    var modelMat = function (t) {
       return function () {
@@ -2706,10 +2709,47 @@ Elm.ObjTest.make = function (_elm) {
                           ,_1: 1000}
              ,shadow: Graphics.ObjTypes.NoShadows};
    };
+   var TimeDelta = F3(function (a,
+   b,
+   c) {
+      return {ctor: "TimeDelta"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
+   });
+   var inputs = function () {
+      var dt = A2(Signal.lift,
+      function (t) {
+         return t / 500;
+      },
+      Time.fps(60));
+      return Signal.sampleOn(dt)(A4(Signal.lift3,
+      TimeDelta,
+      Keyboard.space,
+      Keyboard.wasd,
+      dt));
+   }();
+   var stepCam = F2(function (inputs,
+   cam) {
+      return function () {
+         switch (inputs.ctor)
+         {case "TimeDelta":
+            return _U.replace([["position"
+                               ,A2(Math.Vector3.add,
+                               cam.position,
+                               A3(Math.Vector3.vec3,
+                               Basics.toFloat(inputs._1.x),
+                               Basics.toFloat(inputs._1.y),
+                               0.0))]],
+              cam);}
+         _E.Case($moduleName,
+         "between lines 121 and 125");
+      }();
+   });
    var camera = A3(Signal.foldp,
-   Graphics.Camera.step,
+   stepCam,
    Graphics.Camera.defaultCamera,
-   Graphics.Camera.inputs);
+   inputs);
    var myUnis = A4(Signal.lift3,
    uniformsAtTime,
    Signal.constant({ctor: "_Tuple2"
@@ -2801,6 +2841,7 @@ Elm.ObjTest.make = function (_elm) {
       globProperties);
    }();
    _elm.ObjTest.values = {_op: _op
+                         ,inputs: inputs
                          ,camera: camera
                          ,main: main
                          ,globalsFromCam: globalsFromCam
@@ -2809,7 +2850,9 @@ Elm.ObjTest.make = function (_elm) {
                          ,myUnis: myUnis
                          ,uniformsAtTime: uniformsAtTime
                          ,view: view
-                         ,modelMat: modelMat};
+                         ,modelMat: modelMat
+                         ,stepCam: stepCam
+                         ,TimeDelta: TimeDelta};
    return _elm.ObjTest.values;
 };Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.ObjParser = Elm.Graphics.ObjParser || {};
@@ -4109,14 +4152,12 @@ Elm.Graphics.Camera.make = function (_elm) {
    Graphics.Collage = Elm.Graphics.Collage.make(_elm);
    var Graphics = Graphics || {};
    Graphics.Element = Elm.Graphics.Element.make(_elm);
-   var Keyboard = Elm.Keyboard.make(_elm);
    var List = Elm.List.make(_elm);
    var Math = Math || {};
    Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
    var Math = Math || {};
    Math.Vector3 = Elm.Math.Vector3.make(_elm);
    var Maybe = Elm.Maybe.make(_elm);
-   var Mouse = Elm.Mouse.make(_elm);
    var Native = Native || {};
    Native.Json = Elm.Native.Json.make(_elm);
    var Native = Native || {};
@@ -4125,9 +4166,7 @@ Elm.Graphics.Camera.make = function (_elm) {
    var String = Elm.String.make(_elm);
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
-   var Window = Elm.Window.make(_elm);
    var _op = {};
-   var eyeLevel = -0.5;
    var ByRotation = function (a) {
       return {ctor: "ByRotation"
              ,_0: a};
@@ -4161,10 +4200,19 @@ Elm.Graphics.Camera.make = function (_elm) {
       }();
    };
    var makeView = function (cam) {
-      return A3(Math.Matrix4.makeLookAt,
-      cam.position,
-      lookAtPoint(cam.whereToLook),
-      A3(Math.Vector3.vec3,0,1,0));
+      return function () {
+         var zoomMatrix = Math.Matrix4.makeScale(A3(Math.Vector3.vec3,
+         cam.zoom,
+         cam.zoom,
+         cam.zoom));
+         var lookMatrix = A3(Math.Matrix4.makeLookAt,
+         cam.position,
+         lookAtPoint(cam.whereToLook),
+         A3(Math.Vector3.vec3,0,1,0));
+         return A2(Math.Matrix4.mul,
+         zoomMatrix,
+         lookMatrix);
+      }();
    };
    var Camera = F3(function (a,
    b,
@@ -4174,51 +4222,10 @@ Elm.Graphics.Camera.make = function (_elm) {
              ,whereToLook: b
              ,zoom: c};
    });
-   var TimeDelta = F3(function (a,
-   b,
-   c) {
-      return {ctor: "TimeDelta"
-             ,_0: a
-             ,_1: b
-             ,_2: c};
-   });
-   var inputs = function () {
-      var dt = A2(Signal.lift,
-      function (t) {
-         return t / 500;
-      },
-      Time.fps(60));
-      return Signal.sampleOn(dt)(A4(Signal.lift3,
-      TimeDelta,
-      Keyboard.space,
-      Keyboard.wasd,
-      dt));
-   }();
-   var step = F2(function (inputs,
-   cam) {
-      return function () {
-         switch (inputs.ctor)
-         {case "TimeDelta":
-            return _U.replace([["position"
-                               ,A2(Math.Vector3.add,
-                               cam.position,
-                               A3(Math.Vector3.vec3,
-                               Basics.toFloat(inputs._1.x),
-                               Basics.toFloat(inputs._1.y),
-                               0.0))]],
-              cam);}
-         _E.Case($moduleName,
-         "between lines 58 and 60");
-      }();
-   });
    _elm.Graphics.Camera.values = {_op: _op
-                                 ,eyeLevel: eyeLevel
-                                 ,inputs: inputs
                                  ,defaultCamera: defaultCamera
                                  ,lookAtPoint: lookAtPoint
                                  ,makeView: makeView
-                                 ,step: step
-                                 ,TimeDelta: TimeDelta
                                  ,AtPoint: AtPoint
                                  ,InDirection: InDirection
                                  ,ByRotation: ByRotation
