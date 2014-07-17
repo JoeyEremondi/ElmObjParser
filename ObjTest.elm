@@ -18,29 +18,49 @@ import Graphics.WebGL (..)
 import Http
 
 
-
---Based off the triangle rendering code from http://elm-lang.org/edit/examples/WebGL/Triangle.elm
-  
--- Create the scene
-
+--Different inputs which cause changes to the Camera position
 data CameraInputs
     = TimeDelta Bool {x:Int, y:Int} Float
     --| Mouse (Int,Int)
     
-
+--Create the camera input signal from input signals
 inputs : Signal CameraInputs
 inputs =
   let dt = lift (\t -> t/500) (fps 60)
   in (sampleOn dt <| lift3 TimeDelta Keyboard.space Keyboard.wasd dt)
 
+--Given some user input, movie the camera based on them
+--Intended for use with foldp
+stepCam inputs cam =
+    case inputs of
+      TimeDelta isJumping keyIn dt ->
+          {cam | position <- cam.position `add` (vec3 (toFloat keyIn.x) (toFloat keyIn.y) 0.0)}
 
---camera : Signal (Camera.Camera)
+
+--Signal representing the camera's position over time
+camera : Signal (Camera.Camera)
 camera =  foldp stepCam Camera.defaultCamera inputs
 
---main : Signal Element
 
+{-
+Our main function. This does a lot of things, and the way they do them is fairly important.
+We get the OBJ and Texture files using HTTP, which gives them wrapped in a Response.
+We use LoadAsset to lift them into an asset type, and combine them into one loadStatus.
+We lift this into a rendering function.
+If the load is complete, then we know it's safe to extract them all from their Response forms.
 
+If the load isn't complete, we just render nothing.
 
+The modelSig function for the complete case takes the object file and parses it into a model,
+after we give it our material properties.
+It's important to get the Model  as its own a signal, so that we don't end up parsing
+the OBJ file every clock tick.
+
+Once we have the model signal, we get our object properties (just rotation based on time)
+and our global properties (basically just camera location and some defaults).
+We lift these as arguments to the render function, which produces an Element
+-}
+main : Signal Element
 main = let
     inResp = Http.sendGet <| constant "capsule.obj"
     texResp = loadTexture "capsule0.jpg"
@@ -80,6 +100,7 @@ main = let
   
   in lift4 render modelSig myUnis ( objProperties) ( globProperties)
   
+--Given a camera, create global settings with all default values except the camera
 globalsFromCam : Camera.Camera -> GlobalProperties
 globalsFromCam cam = {camera = cam,
     shadow = NoShadows,
@@ -89,12 +110,14 @@ globalsFromCam cam = {camera = cam,
         PointLight {pos = vec3 1 10 10,
                     specular = vec3 0.1 0.1 0.1,
                     diffuse = vec3 0.1 0.1 0.1}}
-    
+  
+--Compute the rotation of our main object at a given time  
 objAtTime t = {position = vec3 0 0 0,
                 rotation = (t / 1500),
                 scaleFactor = vec3 1 1 1}
 
-  
+--This function just combines toEntity, which converts Models to a WebGL Entity,
+--and the webgl function, which converts entities to HTML elements
 render model unis obj glob = let
     myScene ent =  webgl (1000,1000) [ent]
     ent = toEntity model unis obj glob
@@ -116,10 +139,5 @@ modelMat t = let
     r = makeRotate t (vec3 0 1 0)
   in mul tr (mul r s)
 
-
-stepCam inputs cam =
-    case inputs of
-      TimeDelta isJumping keyIn dt ->
-          {cam | position <- cam.position `add` (vec3 (toFloat keyIn.x) (toFloat keyIn.y) 0.0)}
 
   
