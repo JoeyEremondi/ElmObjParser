@@ -1,5 +1,9 @@
 module ObjTest where
 
+import Keyboard
+import Mouse
+import Window
+
 import Graphics.ObjParser (..)
 import Graphics.ObjTypes (..)
 
@@ -19,8 +23,19 @@ import Http
   
 -- Create the scene
 
+data CameraInputs
+    = TimeDelta Bool {x:Int, y:Int} Float
+    --| Mouse (Int,Int)
+    
+
+inputs : Signal CameraInputs
+inputs =
+  let dt = lift (\t -> t/500) (fps 60)
+  in (sampleOn dt <| lift3 TimeDelta Keyboard.space Keyboard.wasd dt)
+
+
 --camera : Signal (Camera.Camera)
-camera =  foldp Camera.step Camera.defaultCamera Camera.inputs
+camera =  foldp stepCam Camera.defaultCamera inputs
 
 --main : Signal Element
 
@@ -100,3 +115,11 @@ modelMat t = let
     tr = identity
     r = makeRotate t (vec3 0 1 0)
   in mul tr (mul r s)
+
+
+stepCam inputs cam =
+    case inputs of
+      TimeDelta isJumping keyIn dt ->
+          {cam | position <- cam.position `add` (vec3 (toFloat keyIn.x) (toFloat keyIn.y) 0.0)}
+
+  
