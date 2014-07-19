@@ -105,7 +105,7 @@ type ObjectProperties = {
 
 {-|
 The properties of the environment in which a scene is rendered, applied to all objects
-It is generally reccomended to have some ambient light, so that the scene is visible.
+It is generally recommended to have some ambient light, so that the scene is visible.
 Multiple light sources should be supported eventually, but are not supported yet.
 -}
 type GlobalProperties = {
