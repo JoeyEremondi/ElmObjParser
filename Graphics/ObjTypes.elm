@@ -65,7 +65,7 @@ data ProjectionType = Perspective | Ortho
 {-|
 Specify information about a light source.
 A light source can be at a particular point in space,
-or extremely far away (such as a sun).
+or extremely far away with parallel rays (such as a sun).
 -}
 data LightSource = 
     PointLight {pos:Vec3, specular:Vec3, diffuse:Vec3}
@@ -88,7 +88,7 @@ type Material = {
 }
 
 {-|
-Specifies the spatial properties of an object to be rendered.
+A type specifying properties of an object to be rendered.
 These values could be altered every frame using signals,
 allowing for animation.
 -}
@@ -99,8 +99,9 @@ type ObjectProperties = {
 }
 
 {-|
-The properties of the environment in which a scene is rendered.
+The properties of the environment in which a scene is rendered, applied to all objects
 It is generally reccomended to have some ambient light, so that the scene is visible.
+Multiple light sources should be supported eventually, but are not supported yet.
 -}
 type GlobalProperties = {
      camera : Camera,
