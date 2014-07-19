@@ -110,11 +110,3 @@ type GlobalProperties = {
      mainLight : LightSource
 }
 
-{-|
-Uniform values which must be provided in order to render a model.
-The model matrix defines the object's position, size and orientation in space,
-while the view matrix defines the camera position, as well as the type of 3D projection
-used.
-
--}
-type Uniforms = { viewMatrix: Mat4, modelMatrix : Mat4 }

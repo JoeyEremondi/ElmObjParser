@@ -12,7 +12,7 @@ import Graphics.WebGL (..)
 
 import Graphics.Camera as Camera
 
-import LoadAssets as Load
+import LoadAssets as Load 
 import Http
 
 --User picks from a list, is either
@@ -28,6 +28,11 @@ globalsFromCam cam = {camera = cam,
                     specular = vec3 0.1 0.1 0.1,
                     diffuse = vec3 0.1 0.1 0.1}}
 
+objAtTime t = {position = vec3 0 0 0,
+                rotation = (t / 1500),
+                scaleFactor = vec3 1 1 1}
+                    
+                    
 render model obj glob = let
     myScene ent =  webgl (1000,1000) [ent]
     ent = Obj.toEntity model  obj glob
@@ -35,14 +40,14 @@ render model obj glob = let
                     
 main : Signal Element
 main = let
-    elem = lift makeElems inputSig
+    elem = lift3 makeElems inputSig remoteAssets (fps 10)
   in elem
 
 style : Input TexChoice
 style = input <| snd <| head colorOptions
 
 theInput = { texture = input <| SolidColor black,
-    model = input <| "capsule.obj"
+    model = input <| snd <| head modelOptions
     }
 
 inputSig = let
@@ -53,12 +58,16 @@ inputSig = let
     in liftInput <~ theInput.texture.signal ~ theInput.model.signal
 
 
-makeElems inputValues = flow down [
-     dropDown theInput.texture.handle colorOptions,
-     dropDown theInput.model.handle modelOptions,
-     plainText <| show inputValues.texture,
-     plainText <| show inputValues.model
-    ]
+makeElems inputValues (status, texDict, modelDict) t = case status of
+    Load.Complete -> flow down [
+         dropDown theInput.texture.handle colorOptions,
+         dropDown theInput.model.handle modelOptions,
+         plainText <| show inputValues.texture,
+         plainText <| show inputValues.model,
+         
+         render (Dict.getOrFail inputValues.model modelDict) (objAtTime t) (globalsFromCam Camera.defaultCamera)
+                                ]
+    _ -> flow down []
     
 makeVars inputValues = {
     x = 3
@@ -80,11 +89,8 @@ colorOptions = [
           ]
           
 modelOptions : [(String, String)]
-modelOptions = [ ("bunny"    , "bunny.obj")
-          , ("capsule", "capsule.obj")
-
-
-          ]
+modelOptions = [("capsule", "capsule.obj"),
+ ("bunny"    , "bunny.obj")]
 
 pair x y = (x,y)
 
@@ -97,7 +103,7 @@ textureNames = let
   in map toPath <| filter isTex <| map snd colorOptions
   
           
-remoteAssets : Signal (Load.Status, Dict.Dict String Texture, Dict.Dict String String)
+remoteAssets : Signal (Load.Status, Dict.Dict String Texture, Dict.Dict String Obj.Model)
 remoteAssets = let
     texRespSigs = map loadTexture textureNames
     texRespListSig = combine texRespSigs
@@ -114,7 +120,8 @@ remoteAssets = let
             textures = map Load.fromResponseOrFail texResps
             models = map Load.fromResponseOrFail modelResps
             texDict = Dict.fromList <| zip textureNames textures
-            modelDict = Dict.fromList <| zip modelNames models
+            modelFileDict = Dict.fromList <| zip modelNames models
+            modelDict = parseObjDict modelFileDict
           in  (Load.Complete, texDict, modelDict)
         status -> (status, Dict.empty, Dict.empty)
         
@@ -123,3 +130,8 @@ remoteAssets = let
     
   in lift3 makeDicts texRespListSig modRespListSig statusSig
 
+parseObjDict : (Dict.Dict String String)->(Dict.Dict String Obj.Model)  
+parseObjDict d = let
+    fun inFile = Obj.toModel inFile (OneColorMaterial <| vec3 0.8 0.1 0.1) 
+  in Dict.map fun d
+  

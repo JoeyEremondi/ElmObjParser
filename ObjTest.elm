@@ -63,7 +63,7 @@ main = let
                 
     globProperties = lift globalsFromCam camera
   
-  in lift4 render modelSig myUnis ( objProperties) ( globProperties)
+  in lift3 render modelSig ( objProperties) ( globProperties)
   
 globalsFromCam : Camera.Camera -> GlobalProperties
 globalsFromCam cam = {camera = cam,
@@ -80,9 +80,9 @@ objAtTime t = {position = vec3 0 0 0,
                 scaleFactor = vec3 1 1 1}
 
   
-render model unis obj glob = let
+render model obj glob = let
     myScene ent =  webgl (1000,1000) [ent]
-    ent = toEntity model unis obj glob
+    ent = toEntity model obj glob
   in myScene ent
 
 myUnis = lift3 uniformsAtTime (constant (1000,1000)) camera (foldp (+) 0 (fps 30))
