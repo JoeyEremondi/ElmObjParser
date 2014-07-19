@@ -2621,45 +2621,12 @@ Elm.ObjTest.make = function (_elm) {
    var Time = Elm.Time.make(_elm);
    var Window = Elm.Window.make(_elm);
    var _op = {};
-   var modelMat = function (t) {
-      return function () {
-         var r = A2(Math.Matrix4.makeRotate,
-         t,
-         A3(Math.Vector3.vec3,0,1,0));
-         var tr = Math.Matrix4.identity;
-         var s = Math.Matrix4.identity;
-         return A2(Math.Matrix4.mul,
-         tr,
-         A2(Math.Matrix4.mul,r,s));
-      }();
-   };
-   var view = F2(function (_v0,
-   _v1) {
-      return function () {
-         return function () {
-            return Math.Matrix4.identity;
-         }();
-      }();
-   });
-   var uniformsAtTime = F3(function (dims,
-   cam,
-   t) {
-      return function () {
-         var v = A2(view,dims,cam);
-         var m = modelMat(t / 1500);
-         return {_: {}
-                ,modelMatrix: m
-                ,viewMatrix: v};
-      }();
-   });
-   var render = F4(function (model,
-   unis,
+   var render = F3(function (model,
    obj,
    glob) {
       return function () {
-         var ent = A4(Graphics.ObjParser.toEntity,
+         var ent = A3(Graphics.ObjParser.toEntity,
          model,
-         unis,
          obj,
          glob);
          var myScene = function (ent) {
@@ -2750,18 +2717,6 @@ Elm.ObjTest.make = function (_elm) {
    stepCam,
    Graphics.Camera.defaultCamera,
    inputs);
-   var myUnis = A4(Signal.lift3,
-   uniformsAtTime,
-   Signal.constant({ctor: "_Tuple2"
-                   ,_0: 1000
-                   ,_1: 1000}),
-   camera,
-   A3(Signal.foldp,
-   F2(function (x,y) {
-      return x + y;
-   }),
-   0,
-   Time.fps(30)));
    var main = function () {
       var globProperties = A2(Signal.lift,
       globalsFromCam,
@@ -2833,10 +2788,9 @@ Elm.ObjTest.make = function (_elm) {
       inResp,
       texResp,
       bumpResp);
-      return A5(Signal.lift4,
+      return A4(Signal.lift3,
       render,
       modelSig,
-      myUnis,
       objProperties,
       globProperties);
    }();
@@ -2848,10 +2802,6 @@ Elm.ObjTest.make = function (_elm) {
                          ,globalsFromCam: globalsFromCam
                          ,objAtTime: objAtTime
                          ,render: render
-                         ,myUnis: myUnis
-                         ,uniformsAtTime: uniformsAtTime
-                         ,view: view
-                         ,modelMat: modelMat
                          ,TimeDelta: TimeDelta};
    return _elm.ObjTest.values;
 };Elm.Graphics = Elm.Graphics || {};
@@ -2923,6 +2873,8 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
    var Basics = Elm.Basics.make(_elm);
    var Color = Elm.Color.make(_elm);
    var Graphics = Graphics || {};
+   Graphics.Camera = Elm.Graphics.Camera.make(_elm);
+   var Graphics = Graphics || {};
    Graphics.Collage = Elm.Graphics.Collage.make(_elm);
    var Graphics = Graphics || {};
    Graphics.Element = Elm.Graphics.Element.make(_elm);
@@ -2953,7 +2905,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
          switch (_v0.ctor)
          {case "Just": return _v0._0;}
          _E.Case($moduleName,
-         "on line 178, column 21 to 22");
+         "on line 186, column 21 to 22");
       }();
    };
    var deIndexVert = F2(function (vArr,
@@ -2993,7 +2945,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
       0) > 0 ? b * A2(myPow,
       b,
       e - 1) : _E.If($moduleName,
-      "between lines 130 and 133");
+      "between lines 138 and 141");
    });
    var parseFloat = function (s) {
       return function () {
@@ -3014,7 +2966,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                  return fromJust(String.toFloat(_v3._0));}
               break;}
          _E.Case($moduleName,
-         "between lines 137 and 142");
+         "between lines 145 and 150");
       }();
    };
    var lineToVert = function (line) {
@@ -3040,7 +2992,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 152 and 154");
+         "between lines 160 and 162");
       }();
    };
    var lineToVn = function (line) {
@@ -3067,7 +3019,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 155 and 157");
+         "between lines 163 and 165");
       }();
    };
    var lineToVt = function (line) {
@@ -3099,7 +3051,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 158 and 160");
+         "between lines 166 and 168");
       }();
    };
    var FaceVTN = function (a) {
@@ -3125,7 +3077,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                                 ,_v35._1
                                 ,_v35._2]);}
          _E.Case($moduleName,
-         "on line 46, column 21 to 28");
+         "on line 48, column 21 to 28");
       }();
    };
    var normal = function (unis) {
@@ -3169,14 +3121,28 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
              ,_0: a
              ,_1: b};
    });
-   var toEntity = F4(function (model,
-   inUnis,
-   obj,
-   glob) {
+   var toEntity = F3(function (model,
+   objProps,
+   globalProps) {
       return function () {
-         var uniforms = _U.insert("normalMatrix",
-         normal(inUnis),
-         inUnis);
+         var perspectiveMatrix = Graphics.ObjShaders.perspectiveForDims(globalProps.screenDims);
+         var viewMatrix = Graphics.Camera.makeView(globalProps.camera);
+         var modelMatrix = Math.Matrix4.mul(Math.Matrix4.makeTranslate(objProps.position))(A2(Math.Matrix4.mul,
+         Math.Matrix4.makeScale(objProps.scaleFactor),
+         Math.Matrix4.makeRotate(objProps.rotation)(A3(Math.Vector3.vec3,
+         0,
+         1,
+         0))));
+         var normalMatrix = function () {
+            var mv = A2(Math.Matrix4.mul,
+            viewMatrix,
+            modelMatrix);
+            return Math.Matrix4.transpose(Math.Matrix4.inverseOrthonormal(mv));
+         }();
+         var uniforms = {_: {}
+                        ,modelMatrix: modelMatrix
+                        ,normalMatrix: normalMatrix
+                        ,viewMatrix: viewMatrix};
          return function () {
             switch (model.ctor)
             {case "EmptyModel":
@@ -3211,8 +3177,8 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                     var fullUnis = A4(Graphics.ObjShaders.makeUniforms,
                     model._2,
                     model._1,
-                    obj,
-                    glob);
+                    objProps,
+                    globalProps);
                     return A4(Graphics.WebGL.entity,
                     Graphics.ObjShaders.fullVertexShader,
                     Graphics.ObjShaders.fullFragmentShader,
@@ -3236,7 +3202,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                  model._1.texture,
                  uniforms));}
             _E.Case($moduleName,
-            "between lines 67 and 77");
+            "between lines 75 and 85");
          }();
       }();
    });
@@ -3258,7 +3224,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                    ,normal: face._0.normal
                    ,position: face._0.position};}
          _E.Case($moduleName,
-         "between lines 114 and 116");
+         "between lines 122 and 124");
       }();
    };
    var toVTN = function (f) {
@@ -3275,7 +3241,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
             case "FaceVertVTN":
             return f._0;}
          _E.Case($moduleName,
-         "between lines 119 and 121");
+         "between lines 127 and 129");
       }();
    };
    var FaceVertVT = function (a) {
@@ -3292,7 +3258,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                    ,position: face._0.position
                    ,texCoord: face._0.texCoord};}
          _E.Case($moduleName,
-         "between lines 109 and 112");
+         "between lines 117 and 120");
       }();
    };
    var FaceVertV = function (a) {
@@ -3318,7 +3284,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
               return containsV(l._1);
             case "[]": return false;}
          _E.Case($moduleName,
-         "between lines 89 and 92");
+         "between lines 97 and 100");
       }();
    };
    var containsVN = function (l) {
@@ -3330,7 +3296,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
               return containsV(l._1);
             case "[]": return false;}
          _E.Case($moduleName,
-         "between lines 95 and 98");
+         "between lines 103 and 106");
       }();
    };
    var toV = function (face) {
@@ -3346,7 +3312,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
             return {_: {}
                    ,position: face._0.position};}
          _E.Case($moduleName,
-         "between lines 102 and 106");
+         "between lines 110 and 114");
       }();
    };
    var parseFaceVert = F2(function (_v76,
@@ -3406,14 +3372,14 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                                         _v86._0)));}
                                    break;}
                               _E.Case($moduleName,
-                              "between lines 174 and 177");
+                              "between lines 182 and 185");
                            }();}
                       break;}
                  _E.Case($moduleName,
-                 "between lines 172 and 177");
+                 "between lines 180 and 185");
               }();}
          _E.Case($moduleName,
-         "between lines 172 and 177");
+         "between lines 180 and 185");
       }();
    });
    var lineToFace = F2(function (arrs,
@@ -3470,7 +3436,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 163 and 167");
+         "between lines 171 and 175");
       }();
    });
    var parseObj = function (inFile) {
@@ -4016,12 +3982,6 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
    var _op = {};
-   var Uniforms = F2(function (a,
-   b) {
-      return {_: {}
-             ,modelMatrix: b
-             ,viewMatrix: a};
-   });
    var GlobalProperties = F5(function (a,
    b,
    c,
@@ -4129,8 +4089,7 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
                                    ,VertVTN: VertVTN
                                    ,Material: Material
                                    ,ObjectProperties: ObjectProperties
-                                   ,GlobalProperties: GlobalProperties
-                                   ,Uniforms: Uniforms};
+                                   ,GlobalProperties: GlobalProperties};
    return _elm.Graphics.ObjTypes.values;
 };Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Camera = Elm.Graphics.Camera || {};

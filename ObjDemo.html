@@ -2591,16 +2591,26 @@ Elm.Main.make = function (_elm) {
    var Color = Elm.Color.make(_elm);
    var Dict = Elm.Dict.make(_elm);
    var Graphics = Graphics || {};
+   Graphics.Camera = Elm.Graphics.Camera.make(_elm);
+   var Graphics = Graphics || {};
    Graphics.Collage = Elm.Graphics.Collage.make(_elm);
    var Graphics = Graphics || {};
    Graphics.Element = Elm.Graphics.Element.make(_elm);
    var Graphics = Graphics || {};
    Graphics.Input = Elm.Graphics.Input.make(_elm);
    var Graphics = Graphics || {};
+   Graphics.ObjParser = Elm.Graphics.ObjParser.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.ObjTypes = Elm.Graphics.ObjTypes.make(_elm);
+   var Graphics = Graphics || {};
    Graphics.WebGL = Elm.Graphics.WebGL.make(_elm);
    var Http = Elm.Http.make(_elm);
    var List = Elm.List.make(_elm);
    var LoadAssets = Elm.LoadAssets.make(_elm);
+   var Math = Math || {};
+   Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
    var Maybe = Elm.Maybe.make(_elm);
    var Native = Native || {};
    Native.Json = Elm.Native.Json.make(_elm);
@@ -2611,19 +2621,87 @@ Elm.Main.make = function (_elm) {
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
    var _op = {};
+   var parseObjDict = function (d) {
+      return function () {
+         var fun = function (inFile) {
+            return A2(Graphics.ObjParser.toModel,
+            inFile,
+            Graphics.ObjTypes.OneColorMaterial(A3(Math.Vector3.vec3,
+            0.8,
+            0.1,
+            0.1)));
+         };
+         return A2(Dict.map,fun,d);
+      }();
+   };
    var pair = F2(function (x,y) {
       return {ctor: "_Tuple2"
              ,_0: x
              ,_1: y};
    });
    var modelOptions = _L.fromArray([{ctor: "_Tuple2"
-                                    ,_0: "bunny"
-                                    ,_1: "bunny.obj"}
-                                   ,{ctor: "_Tuple2"
                                     ,_0: "capsule"
-                                    ,_1: "capsule.obj"}]);
+                                    ,_1: "capsule.obj"}
+                                   ,{ctor: "_Tuple2"
+                                    ,_0: "bunny"
+                                    ,_1: "bunny.obj"}]);
    var makeVars = function (inputValues) {
       return {_: {},x: 3};
+   };
+   var render = F3(function (model,
+   obj,
+   glob) {
+      return function () {
+         var ent = A3(Graphics.ObjParser.toEntity,
+         model,
+         obj,
+         glob);
+         var myScene = function (ent) {
+            return A2(Graphics.WebGL.webgl,
+            {ctor: "_Tuple2"
+            ,_0: 1000
+            ,_1: 1000},
+            _L.fromArray([ent]));
+         };
+         return myScene(ent);
+      }();
+   });
+   var objAtTime = function (t) {
+      return {_: {}
+             ,position: A3(Math.Vector3.vec3,
+             0,
+             0,
+             0)
+             ,rotation: t / 1500
+             ,scaleFactor: A3(Math.Vector3.vec3,
+             1,
+             1,
+             1)};
+   };
+   var globalsFromCam = function (cam) {
+      return {_: {}
+             ,ambientLight: A3(Math.Vector3.vec3,
+             0.3,
+             0.3,
+             0.3)
+             ,camera: cam
+             ,mainLight: Graphics.ObjTypes.PointLight({_: {}
+                                                      ,diffuse: A3(Math.Vector3.vec3,
+                                                      0.1,
+                                                      0.1,
+                                                      0.1)
+                                                      ,pos: A3(Math.Vector3.vec3,
+                                                      1,
+                                                      10,
+                                                      10)
+                                                      ,specular: A3(Math.Vector3.vec3,
+                                                      0.1,
+                                                      0.1,
+                                                      0.1)})
+             ,screenDims: {ctor: "_Tuple2"
+                          ,_0: 1000
+                          ,_1: 1000}
+             ,shadow: Graphics.ObjTypes.NoShadows};
    };
    var TexturePath = function (a) {
       return {ctor: "TexturePath"
@@ -2662,10 +2740,10 @@ Elm.Main.make = function (_elm) {
                       _L.append(String.show(100 * _v0._0._0),
                       "% loaded")));}
                  _E.Case($moduleName,
-                 "between lines 45 and 50");
+                 "between lines 77 and 82");
               }();}
          _E.Case($moduleName,
-         "between lines 45 and 50");
+         "between lines 77 and 82");
       }();
    });
    var textureNames = function () {
@@ -2675,7 +2753,7 @@ Elm.Main.make = function (_elm) {
             {case "TexturePath":
                return _v8._0;}
             _E.Case($moduleName,
-            "on line 73, column 30 to 31");
+            "on line 102, column 30 to 31");
          }();
       };
       var isTex = function (choice) {
@@ -2719,9 +2797,10 @@ Elm.Main.make = function (_elm) {
                     var models = A2(List.map,
                     LoadAssets.fromResponseOrFail,
                     modelResps);
-                    var modelDict = Dict.fromList(A2(List.zip,
+                    var modelFileDict = Dict.fromList(A2(List.zip,
                     modelNames,
                     models));
+                    var modelDict = parseObjDict(modelFileDict);
                     var textures = A2(List.map,
                     LoadAssets.fromResponseOrFail,
                     texResps);
@@ -2758,7 +2837,7 @@ Elm.Main.make = function (_elm) {
              ,_0: a};
    };
    var theInput = {_: {}
-                  ,model: Graphics.Input.input("capsule.obj")
+                  ,model: Graphics.Input.input(Basics.snd(List.head(modelOptions)))
                   ,texture: Graphics.Input.input(SolidColor(Color.black))};
    var inputSig = function () {
       var liftInput = F2(function (tex,
@@ -2773,25 +2852,51 @@ Elm.Main.make = function (_elm) {
       theInput.texture.signal),
       theInput.model.signal);
    }();
-   var makeElems = function (inputValues) {
-      return A2(Graphics.Element.flow,
-      Graphics.Element.down,
-      _L.fromArray([A2(Graphics.Input.dropDown,
-                   theInput.texture.handle,
-                   colorOptions)
-                   ,A2(Graphics.Input.dropDown,
-                   theInput.model.handle,
-                   modelOptions)
-                   ,Text.plainText(String.show(inputValues.texture))
-                   ,Text.plainText(String.show(inputValues.model))]));
-   };
+   var makeElems = F3(function (inputValues,
+   _v14,
+   t) {
+      return function () {
+         switch (_v14.ctor)
+         {case "_Tuple3":
+            return function () {
+                 switch (_v14._0.ctor)
+                 {case "Complete":
+                    return A2(Graphics.Element.flow,
+                      Graphics.Element.down,
+                      _L.fromArray([A2(Graphics.Input.dropDown,
+                                   theInput.texture.handle,
+                                   colorOptions)
+                                   ,A2(Graphics.Input.dropDown,
+                                   theInput.model.handle,
+                                   modelOptions)
+                                   ,Text.plainText(String.show(inputValues.texture))
+                                   ,Text.plainText(String.show(inputValues.model))
+                                   ,A3(render,
+                                   A2(Dict.getOrFail,
+                                   inputValues.model,
+                                   _v14._2),
+                                   objAtTime(t),
+                                   globalsFromCam(Graphics.Camera.defaultCamera))]));}
+                 return A2(Graphics.Element.flow,
+                 Graphics.Element.down,
+                 _L.fromArray([]));
+              }();}
+         _E.Case($moduleName,
+         "between lines 61 and 71");
+      }();
+   });
    var main = function () {
-      var elem = A2(Signal.lift,
+      var elem = A4(Signal.lift3,
       makeElems,
-      inputSig);
+      inputSig,
+      remoteAssets,
+      Time.fps(10));
       return elem;
    }();
    _elm.Main.values = {_op: _op
+                      ,globalsFromCam: globalsFromCam
+                      ,objAtTime: objAtTime
+                      ,render: render
                       ,main: main
                       ,style: style
                       ,theInput: theInput
@@ -2804,9 +2909,1396 @@ Elm.Main.make = function (_elm) {
                       ,pair: pair
                       ,textureNames: textureNames
                       ,remoteAssets: remoteAssets
+                      ,parseObjDict: parseObjDict
                       ,SolidColor: SolidColor
                       ,TexturePath: TexturePath};
    return _elm.Main.values;
+};Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.ObjParser = Elm.Graphics.ObjParser || {};
+Elm.Graphics.ObjParser.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.ObjParser = _elm.Graphics.ObjParser || {};
+   if (_elm.Graphics.ObjParser.values)
+   return _elm.Graphics.ObjParser.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Graphics.ObjParser";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.ObjParserInternal = Elm.Graphics.ObjParserInternal.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.ObjTypes = Elm.Graphics.ObjTypes.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.WebGL = Elm.Graphics.WebGL.make(_elm);
+   var Http = Elm.Http.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Math = Math || {};
+   Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var emptyModel = Graphics.ObjParserInternal.EmptyModel;
+   var toEntity = Graphics.ObjParserInternal.toEntity;
+   var toModel = Graphics.ObjParserInternal.toModel;
+   _elm.Graphics.ObjParser.values = {_op: _op
+                                    ,toModel: toModel
+                                    ,toEntity: toEntity
+                                    ,emptyModel: emptyModel};
+   return _elm.Graphics.ObjParser.values;
+};Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.ObjParserInternal = Elm.Graphics.ObjParserInternal || {};
+Elm.Graphics.ObjParserInternal.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.ObjParserInternal = _elm.Graphics.ObjParserInternal || {};
+   if (_elm.Graphics.ObjParserInternal.values)
+   return _elm.Graphics.ObjParserInternal.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Graphics.ObjParserInternal";
+   var Array = Elm.Array.make(_elm);
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Camera = Elm.Graphics.Camera.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.ObjShaders = Elm.Graphics.ObjShaders.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.ObjTypes = Elm.Graphics.ObjTypes.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.WebGL = Elm.Graphics.WebGL.make(_elm);
+   var Http = Elm.Http.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Math = Math || {};
+   Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var fromJust = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "Just": return _v0._0;}
+         _E.Case($moduleName,
+         "on line 186, column 21 to 22");
+      }();
+   };
+   var deIndexVert = F2(function (vArr,
+   s) {
+      return function () {
+         var i = fromJust(String.toInt(s));
+         return A2(Array.getOrFail,
+         i - 1,
+         vArr);
+      }();
+   });
+   var isFaceLine = function (s) {
+      return A2(String.startsWith,
+      "f",
+      s);
+   };
+   var isVnLine = function (s) {
+      return A2(String.startsWith,
+      "vn",
+      s);
+   };
+   var isVtLine = function (s) {
+      return A2(String.startsWith,
+      "vt",
+      s);
+   };
+   var isVertexLine = function (s) {
+      return _U.eq("v",
+      List.head(String.words(s)));
+   };
+   var myPow = F2(function (b,e) {
+      return _U.cmp(e,
+      0) < 0 ? 1.0 / A2(myPow,
+      b,
+      0 - e) : _U.eq(e,
+      0) ? 1 : _U.cmp(e,
+      0) > 0 ? b * A2(myPow,
+      b,
+      e - 1) : _E.If($moduleName,
+      "between lines 138 and 141");
+   });
+   var parseFloat = function (s) {
+      return function () {
+         var _v3 = A2(String.split,
+         "e",
+         s);
+         switch (_v3.ctor)
+         {case "::": switch (_v3._1.ctor)
+              {case "::":
+                 switch (_v3._1._1.ctor)
+                   {case "[]": return function () {
+                           var pi = fromJust(String.toInt(_v3._1._0));
+                           var bf = fromJust(String.toFloat(_v3._0));
+                           return bf * A2(myPow,10.0,pi);
+                        }();}
+                   break;
+                 case "[]":
+                 return fromJust(String.toFloat(_v3._0));}
+              break;}
+         _E.Case($moduleName,
+         "between lines 145 and 150");
+      }();
+   };
+   var lineToVert = function (line) {
+      return function () {
+         var _v8 = String.words(line);
+         switch (_v8.ctor)
+         {case "::": switch (_v8._0)
+              {case "v": switch (_v8._1.ctor)
+                   {case "::":
+                      switch (_v8._1._1.ctor)
+                        {case "::":
+                           switch (_v8._1._1._1.ctor)
+                             {case "::":
+                                switch (_v8._1._1._1._1.ctor)
+                                  {case "[]":
+                                     return A3(Math.Vector3.vec3,
+                                       parseFloat(_v8._1._0),
+                                       parseFloat(_v8._1._1._0),
+                                       parseFloat(_v8._1._1._1._0));}
+                                  break;}
+                             break;}
+                        break;}
+                   break;}
+              break;}
+         _E.Case($moduleName,
+         "between lines 160 and 162");
+      }();
+   };
+   var lineToVn = function (line) {
+      return function () {
+         var _v17 = String.words(line);
+         switch (_v17.ctor)
+         {case "::": switch (_v17._0)
+              {case "vn":
+                 switch (_v17._1.ctor)
+                   {case "::":
+                      switch (_v17._1._1.ctor)
+                        {case "::":
+                           switch (_v17._1._1._1.ctor)
+                             {case "::":
+                                switch (_v17._1._1._1._1.ctor)
+                                  {case "[]":
+                                     return A3(Math.Vector3.vec3,
+                                       parseFloat(_v17._1._0),
+                                       parseFloat(_v17._1._1._0),
+                                       parseFloat(_v17._1._1._1._0));}
+                                  break;}
+                             break;}
+                        break;}
+                   break;}
+              break;}
+         _E.Case($moduleName,
+         "between lines 163 and 165");
+      }();
+   };
+   var lineToVt = function (line) {
+      return function () {
+         var _v26 = String.words(line);
+         switch (_v26.ctor)
+         {case "::": switch (_v26._0)
+              {case "vt":
+                 switch (_v26._1.ctor)
+                   {case "::":
+                      switch (_v26._1._1.ctor)
+                        {case "::":
+                           switch (_v26._1._1._1.ctor)
+                             {case "::":
+                                switch (_v26._1._1._1._1.ctor)
+                                  {case "[]":
+                                     return A3(Math.Vector3.vec3,
+                                       parseFloat(_v26._1._0),
+                                       parseFloat(_v26._1._1._0),
+                                       parseFloat(_v26._1._1._1._0));}
+                                  break;
+                                case "[]":
+                                return A3(Math.Vector3.vec3,
+                                  parseFloat(_v26._1._0),
+                                  parseFloat(_v26._1._1._0),
+                                  0.0);}
+                             break;}
+                        break;}
+                   break;}
+              break;}
+         _E.Case($moduleName,
+         "between lines 166 and 168");
+      }();
+   };
+   var FaceVTN = function (a) {
+      return {ctor: "FaceVTN"
+             ,_0: a};
+   };
+   var FaceVN = function (a) {
+      return {ctor: "FaceVN"
+             ,_0: a};
+   };
+   var FaceVT = function (a) {
+      return {ctor: "FaceVT"
+             ,_0: a};
+   };
+   var FaceV = function (a) {
+      return {ctor: "FaceV",_0: a};
+   };
+   var triToList = function (_v35) {
+      return function () {
+         switch (_v35.ctor)
+         {case "_Tuple3":
+            return _L.fromArray([_v35._0
+                                ,_v35._1
+                                ,_v35._2]);}
+         _E.Case($moduleName,
+         "on line 48, column 21 to 28");
+      }();
+   };
+   var normal = function (unis) {
+      return function () {
+         var mv = A2(Math.Matrix4.mul,
+         unis.viewMatrix,
+         unis.modelMatrix);
+         return Math.Matrix4.transpose(Math.Matrix4.inverseOrthonormal(unis.modelMatrix));
+      }();
+   };
+   var EmptyModel = {ctor: "EmptyModel"};
+   var MaterialModel = F3(function (a,
+   b,
+   c) {
+      return {ctor: "MaterialModel"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
+   });
+   var SmoothTextured = F2(function (a,
+   b) {
+      return {ctor: "SmoothTextured"
+             ,_0: a
+             ,_1: b};
+   });
+   var SmoothColored = F2(function (a,
+   b) {
+      return {ctor: "SmoothColored"
+             ,_0: a
+             ,_1: b};
+   });
+   var FlatTextured = F2(function (a,
+   b) {
+      return {ctor: "FlatTextured"
+             ,_0: a
+             ,_1: b};
+   });
+   var FlatColored = F2(function (a,
+   b) {
+      return {ctor: "FlatColored"
+             ,_0: a
+             ,_1: b};
+   });
+   var toEntity = F3(function (model,
+   objProps,
+   globalProps) {
+      return function () {
+         var perspectiveMatrix = Graphics.ObjShaders.perspectiveForDims(globalProps.screenDims);
+         var viewMatrix = Graphics.Camera.makeView(globalProps.camera);
+         var modelMatrix = Math.Matrix4.mul(Math.Matrix4.makeTranslate(objProps.position))(A2(Math.Matrix4.mul,
+         Math.Matrix4.makeScale(objProps.scaleFactor),
+         Math.Matrix4.makeRotate(objProps.rotation)(A3(Math.Vector3.vec3,
+         0,
+         1,
+         0))));
+         var normalMatrix = function () {
+            var mv = A2(Math.Matrix4.mul,
+            viewMatrix,
+            modelMatrix);
+            return Math.Matrix4.transpose(Math.Matrix4.inverseOrthonormal(mv));
+         }();
+         var uniforms = {_: {}
+                        ,modelMatrix: modelMatrix
+                        ,normalMatrix: normalMatrix
+                        ,viewMatrix: viewMatrix};
+         return function () {
+            switch (model.ctor)
+            {case "EmptyModel":
+               return A4(Graphics.WebGL.entity,
+                 Graphics.ObjShaders.vertexShaderV,
+                 Graphics.ObjShaders.fragmentShaderVN,
+                 _L.fromArray([]),
+                 _U.insert("inputColor",
+                 A3(Math.Vector3.vec3,
+                 0.0,
+                 0.0,
+                 0.0),
+                 uniforms));
+               case "FlatColored":
+               return A4(Graphics.WebGL.entity,
+                 Graphics.ObjShaders.vertexShaderV,
+                 Graphics.ObjShaders.fragmentShaderV,
+                 model._0,
+                 _U.insert("inputColor",
+                 model._1.color,
+                 uniforms));
+               case "FlatTextured":
+               return A4(Graphics.WebGL.entity,
+                 Graphics.ObjShaders.vertexShaderVT,
+                 Graphics.ObjShaders.fragmentShaderVT,
+                 model._0,
+                 _U.insert("texture",
+                 model._1.texture,
+                 uniforms));
+               case "MaterialModel":
+               return function () {
+                    var fullUnis = A4(Graphics.ObjShaders.makeUniforms,
+                    model._2,
+                    model._1,
+                    objProps,
+                    globalProps);
+                    return A4(Graphics.WebGL.entity,
+                    Graphics.ObjShaders.fullVertexShader,
+                    Graphics.ObjShaders.fullFragmentShader,
+                    model._0,
+                    fullUnis);
+                 }();
+               case "SmoothColored":
+               return A4(Graphics.WebGL.entity,
+                 Graphics.ObjShaders.vertexShaderVN,
+                 Graphics.ObjShaders.fragmentShaderVN,
+                 model._0,
+                 _U.insert("inputColor",
+                 model._1.color,
+                 uniforms));
+               case "SmoothTextured":
+               return A4(Graphics.WebGL.entity,
+                 Graphics.ObjShaders.vertexShaderVTN,
+                 Graphics.ObjShaders.fragmentShaderVTN,
+                 model._0,
+                 _U.insert("texture",
+                 model._1.texture,
+                 uniforms));}
+            _E.Case($moduleName,
+            "between lines 75 and 85");
+         }();
+      }();
+   });
+   var FaceVertVTN = function (a) {
+      return {ctor: "FaceVertVTN"
+             ,_0: a};
+   };
+   var FaceVertVN = function (a) {
+      return {ctor: "FaceVertVN"
+             ,_0: a};
+   };
+   var toVN = function (face) {
+      return function () {
+         switch (face.ctor)
+         {case "FaceVertVN":
+            return face._0;
+            case "FaceVertVTN":
+            return {_: {}
+                   ,normal: face._0.normal
+                   ,position: face._0.position};}
+         _E.Case($moduleName,
+         "between lines 122 and 124");
+      }();
+   };
+   var toVTN = function (f) {
+      return function () {
+         switch (f.ctor)
+         {case "FaceVertVN":
+            return {_: {}
+                   ,normal: f._0.normal
+                   ,position: f._0.position
+                   ,texCoord: A3(Math.Vector3.vec3,
+                   0,
+                   0,
+                   0)};
+            case "FaceVertVTN":
+            return f._0;}
+         _E.Case($moduleName,
+         "between lines 127 and 129");
+      }();
+   };
+   var FaceVertVT = function (a) {
+      return {ctor: "FaceVertVT"
+             ,_0: a};
+   };
+   var toVT = function (face) {
+      return function () {
+         switch (face.ctor)
+         {case "FaceVertVT":
+            return face._0;
+            case "FaceVertVTN":
+            return {_: {}
+                   ,position: face._0.position
+                   ,texCoord: face._0.texCoord};}
+         _E.Case($moduleName,
+         "between lines 117 and 120");
+      }();
+   };
+   var FaceVertV = function (a) {
+      return {ctor: "FaceVertV"
+             ,_0: a};
+   };
+   var isV = function (vert) {
+      return function () {
+         switch (vert.ctor)
+         {case "FaceVertV": return true;}
+         return false;
+      }();
+   };
+   var containsV = function (l) {
+      return A2(List.any,isV,l);
+   };
+   var containsVT = function (l) {
+      return function () {
+         switch (l.ctor)
+         {case "::": switch (l._0.ctor)
+              {case "FaceVertVT":
+                 return true;}
+              return containsV(l._1);
+            case "[]": return false;}
+         _E.Case($moduleName,
+         "between lines 97 and 100");
+      }();
+   };
+   var containsVN = function (l) {
+      return function () {
+         switch (l.ctor)
+         {case "::": switch (l._0.ctor)
+              {case "FaceVertVN":
+                 return true;}
+              return containsV(l._1);
+            case "[]": return false;}
+         _E.Case($moduleName,
+         "between lines 103 and 106");
+      }();
+   };
+   var toV = function (face) {
+      return function () {
+         switch (face.ctor)
+         {case "FaceVertV":
+            return face._0;
+            case "FaceVertVN": return {_: {}
+                                      ,position: face._0.position};
+            case "FaceVertVT": return {_: {}
+                                      ,position: face._0.position};
+            case "FaceVertVTN":
+            return {_: {}
+                   ,position: face._0.position};}
+         _E.Case($moduleName,
+         "between lines 110 and 114");
+      }();
+   };
+   var parseFaceVert = F2(function (_v76,
+   str) {
+      return function () {
+         switch (_v76.ctor)
+         {case "_Tuple3":
+            return function () {
+                 var _v81 = A2(String.split,
+                 "//",
+                 str);
+                 switch (_v81.ctor)
+                 {case "::":
+                    switch (_v81._1.ctor)
+                      {case "::":
+                         switch (_v81._1._1.ctor)
+                           {case "[]":
+                              return FaceVertVN(A2(Graphics.ObjTypes.VertVN,
+                                A2(deIndexVert,_v76._0,_v81._0),
+                                A2(deIndexVert,
+                                _v76._2,
+                                _v81._1._0)));}
+                           break;
+                         case "[]": return function () {
+                              var _v86 = A2(String.split,
+                              "/",
+                              _v81._0);
+                              switch (_v86.ctor)
+                              {case "::":
+                                 switch (_v86._1.ctor)
+                                   {case "::":
+                                      switch (_v86._1._1.ctor)
+                                        {case "::":
+                                           switch (_v86._1._1._1.ctor)
+                                             {case "[]":
+                                                return FaceVertVTN(A3(Graphics.ObjTypes.VertVTN,
+                                                  A2(deIndexVert,
+                                                  _v76._0,
+                                                  _v86._0),
+                                                  A2(deIndexVert,
+                                                  _v76._1,
+                                                  _v86._1._0),
+                                                  A2(deIndexVert,
+                                                  _v76._2,
+                                                  _v86._1._1._0)));}
+                                             break;
+                                           case "[]":
+                                           return FaceVertVT(A2(Graphics.ObjTypes.VertVT,
+                                             A2(deIndexVert,_v76._0,_v86._0),
+                                             A2(deIndexVert,
+                                             _v76._1,
+                                             _v86._1._0)));}
+                                        break;
+                                      case "[]":
+                                      return FaceVertV(Graphics.ObjTypes.VertV(A2(deIndexVert,
+                                        _v76._0,
+                                        _v86._0)));}
+                                   break;}
+                              _E.Case($moduleName,
+                              "between lines 182 and 185");
+                           }();}
+                      break;}
+                 _E.Case($moduleName,
+                 "between lines 180 and 185");
+              }();}
+         _E.Case($moduleName,
+         "between lines 180 and 185");
+      }();
+   });
+   var lineToFace = F2(function (arrs,
+   line) {
+      return function () {
+         var _v93 = String.words(line);
+         switch (_v93.ctor)
+         {case "::": switch (_v93._0)
+              {case "f": switch (_v93._1.ctor)
+                   {case "::":
+                      switch (_v93._1._1.ctor)
+                        {case "::":
+                           switch (_v93._1._1._1.ctor)
+                             {case "::":
+                                switch (_v93._1._1._1._1.ctor)
+                                  {case "::":
+                                     switch (_v93._1._1._1._1._1.ctor)
+                                       {case "[]":
+                                          return _L.fromArray([{ctor: "_Tuple3"
+                                                               ,_0: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v93._1._0)
+                                                               ,_1: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v93._1._1._0)
+                                                               ,_2: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v93._1._1._1._0)}
+                                                              ,{ctor: "_Tuple3"
+                                                               ,_0: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v93._1._1._0)
+                                                               ,_1: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v93._1._1._1._0)
+                                                               ,_2: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v93._1._1._1._1._0)}]);}
+                                       break;
+                                     case "[]":
+                                     return _L.fromArray([{ctor: "_Tuple3"
+                                                          ,_0: A2(parseFaceVert,
+                                                          arrs,
+                                                          _v93._1._0)
+                                                          ,_1: A2(parseFaceVert,
+                                                          arrs,
+                                                          _v93._1._1._0)
+                                                          ,_2: A2(parseFaceVert,
+                                                          arrs,
+                                                          _v93._1._1._1._0)}]);}
+                                  break;}
+                             break;}
+                        break;}
+                   break;}
+              break;}
+         _E.Case($moduleName,
+         "between lines 171 and 175");
+      }();
+   });
+   var parseObj = function (inFile) {
+      return function () {
+         var lines = String.lines(inFile);
+         var vLines = A2(List.filter,
+         isVertexLine,
+         lines);
+         var vertices = Array.fromList(A2(List.map,
+         lineToVert,
+         vLines));
+         var vtLines = A2(List.filter,
+         isVtLine,
+         lines);
+         var texCoords = Array.fromList(A2(List.map,
+         lineToVt,
+         vtLines));
+         var vnLines = A2(List.filter,
+         isVnLine,
+         lines);
+         var normals = Array.fromList(A2(List.map,
+         lineToVn,
+         vnLines));
+         var fLines = A2(List.filter,
+         isFaceLine,
+         lines);
+         var faces = List.concat(A2(List.map,
+         lineToFace({ctor: "_Tuple3"
+                    ,_0: vertices
+                    ,_1: texCoords
+                    ,_2: normals}),
+         fLines));
+         return faces;
+      }();
+   };
+   var toModel = F2(function (objSource,
+   colorData) {
+      return function () {
+         var triangles = parseObj(objSource);
+         var faceList = List.concat(A2(List.map,
+         triToList,
+         triangles));
+         return function () {
+            var _v104 = {ctor: "_Tuple4"
+                        ,_0: containsV(faceList)
+                        ,_1: containsVT(faceList)
+                        ,_2: containsVN(faceList)
+                        ,_3: colorData};
+            switch (_v104.ctor)
+            {case "_Tuple4":
+               switch (_v104._0)
+                 {case true:
+                    switch (_v104._3.ctor)
+                      {case "OneColorMaterial":
+                         return A2(FlatColored,
+                           A2(List.map,
+                           Graphics.WebGL.mapTriangle(toV),
+                           triangles),
+                           {_: {},color: _v104._3._0});}
+                      break;}
+                 switch (_v104._1)
+                 {case true: switch (_v104._2)
+                      {case true:
+                         switch (_v104._3.ctor)
+                           {case "OneColorMaterial":
+                              return A2(FlatColored,
+                                A2(List.map,
+                                Graphics.WebGL.mapTriangle(toV),
+                                triangles),
+                                {_: {},color: _v104._3._0});}
+                           break;}
+                      switch (_v104._3.ctor)
+                      {case "OneColorMaterial":
+                         return A2(FlatColored,
+                           A2(List.map,
+                           Graphics.WebGL.mapTriangle(toV),
+                           triangles),
+                           {_: {},color: _v104._3._0});
+                         case "OneTextureMaterial":
+                         return A2(FlatTextured,
+                           A2(List.map,
+                           Graphics.WebGL.mapTriangle(toVT),
+                           triangles),
+                           {_: {},texture: _v104._3._0});}
+                      break;}
+                 switch (_v104._2)
+                 {case true:
+                    switch (_v104._3.ctor)
+                      {case "OneColorMaterial":
+                         return A2(SmoothColored,
+                           A2(List.map,
+                           Graphics.WebGL.mapTriangle(toVN),
+                           triangles),
+                           {_: {},color: _v104._3._0});}
+                      break;}
+                 switch (_v104._0)
+                 {case false: switch (_v104._1)
+                      {case false: switch (_v104._2)
+                           {case false:
+                              switch (_v104._3.ctor)
+                                {case "FullMaterial":
+                                   return A3(MaterialModel,
+                                     A2(List.map,
+                                     Graphics.WebGL.mapTriangle(toVTN),
+                                     triangles),
+                                     _v104._3._0,
+                                     _v104._3._1);
+                                   case "OneColorMaterial":
+                                   return A2(SmoothColored,
+                                     A2(List.map,
+                                     Graphics.WebGL.mapTriangle(toVN),
+                                     triangles),
+                                     {_: {},color: _v104._3._0});
+                                   case "OneTextureMaterial":
+                                   return A2(SmoothTextured,
+                                     A2(List.map,
+                                     Graphics.WebGL.mapTriangle(toVTN),
+                                     triangles),
+                                     {_: {},texture: _v104._3._0});}
+                                break;}
+                           break;}
+                      break;}
+                 break;}
+            return A2(FlatColored,
+            A2(List.map,
+            Graphics.WebGL.mapTriangle(toV),
+            triangles),
+            {_: {}
+            ,color: A3(Math.Vector3.vec3,
+            0.5,
+            0.5,
+            0.5)});
+         }();
+      }();
+   });
+   _elm.Graphics.ObjParserInternal.values = {_op: _op
+                                            ,normal: normal
+                                            ,triToList: triToList
+                                            ,toModel: toModel
+                                            ,toEntity: toEntity
+                                            ,isV: isV
+                                            ,containsV: containsV
+                                            ,containsVT: containsVT
+                                            ,containsVN: containsVN
+                                            ,toV: toV
+                                            ,toVT: toVT
+                                            ,toVN: toVN
+                                            ,toVTN: toVTN
+                                            ,myPow: myPow
+                                            ,parseFloat: parseFloat
+                                            ,isVertexLine: isVertexLine
+                                            ,isVtLine: isVtLine
+                                            ,isVnLine: isVnLine
+                                            ,isFaceLine: isFaceLine
+                                            ,lineToVert: lineToVert
+                                            ,lineToVn: lineToVn
+                                            ,lineToVt: lineToVt
+                                            ,lineToFace: lineToFace
+                                            ,parseFaceVert: parseFaceVert
+                                            ,fromJust: fromJust
+                                            ,deIndexVert: deIndexVert
+                                            ,parseObj: parseObj
+                                            ,FaceVertV: FaceVertV
+                                            ,FaceVertVT: FaceVertVT
+                                            ,FaceVertVN: FaceVertVN
+                                            ,FaceVertVTN: FaceVertVTN
+                                            ,FlatColored: FlatColored
+                                            ,FlatTextured: FlatTextured
+                                            ,SmoothColored: SmoothColored
+                                            ,SmoothTextured: SmoothTextured
+                                            ,MaterialModel: MaterialModel
+                                            ,EmptyModel: EmptyModel
+                                            ,FaceV: FaceV
+                                            ,FaceVT: FaceVT
+                                            ,FaceVN: FaceVN
+                                            ,FaceVTN: FaceVTN};
+   return _elm.Graphics.ObjParserInternal.values;
+};Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.ObjShaders = Elm.Graphics.ObjShaders || {};
+Elm.Graphics.ObjShaders.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.ObjShaders = _elm.Graphics.ObjShaders || {};
+   if (_elm.Graphics.ObjShaders.values)
+   return _elm.Graphics.ObjShaders.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Graphics.ObjShaders";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Camera = Elm.Graphics.Camera.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.ObjTypes = Elm.Graphics.ObjTypes.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.WebGL = Elm.Graphics.WebGL.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Math = Math || {};
+   Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
+   var Math = Math || {};
+   Math.Vector4 = Elm.Math.Vector4.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Graphics = Native.Graphics || {};
+   Native.Graphics.WebGL = Elm.Native.Graphics.WebGL.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var fullFragmentShader = {"src": "\n\n\nprecision lowp float;\nuniform mat4 normalMatrix;\n\nuniform vec3 pointLightPosition;\nuniform vec3 pointLightDiffuse;\nuniform vec3 pointLightSpecular;\n\n\nuniform vec3 globalAmbient;\n\nuniform vec3 ambientColor;\nuniform sampler2D ambientTexture;\nuniform float useAmbientColor;\nuniform float useAmbientTexture;\n\nuniform vec3 diffuseColor;\nuniform sampler2D diffuseTexture;\nuniform float useDiffuseColor;\nuniform float useDiffuseTexture;\n\nuniform vec3 specularColor;\nuniform sampler2D specularTexture;\nuniform float useSpecularColor;\nuniform float useSpecularTexture;\n\nuniform sampler2D bumpTexture;\nuniform float useBumpTexture;\n\nuniform float specularCoeff;\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\nvarying vec3 lightVec;\n\n\nvoid main () {\n\n  // all following gemetric computations are performed in the\n  // camera coordinate system (aka eye coordinates)\n  //TODO normalize?\n  vec3 lightDirection = normalize(lightVec);\n  vec3 normal = normalize(vNorm) + (1.0*useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;\n  vec3 vertPos = vcoord;\n  vec3 reflectDir = reflect(-lightDirection, normal);\n  vec3 viewMatrixDir = (-vertPos);\n  \n  vec3 materialBase = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy).xyz);\n  \n  vec3 materialDiffuse = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy).xyz);\n  \n  vec3 materialSpecular = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy).xyz);\n  \n  vec3 base = globalAmbient * materialBase;\n  vec3 diff = pointLightDiffuse * materialDiffuse;\n  vec3 spec = pointLightSpecular * materialSpecular;\n  \n\n  float lambertian = max(dot(lightDirection,vNorm), 0.0);\n  float specular = 0.0;\n  \n  if(lambertian > 0.0) {\n    float specAngle = max(dot(reflectDir, viewMatrixDir), 0.0);\n    specular = pow(specAngle, specularCoeff);\n       \n    \n  }\n  gl_FragColor = vec4((lambertian*diff + specular*spec) + base, 1.0);\n\n\n\n  \n}\n\n"};
+   var fullVertexShader = {"src": "\n\nprecision lowp float;\n\nattribute vec3 position;\nattribute vec3 texCoord;\nattribute vec3 normal;\n\nuniform vec3 pointLightPosition;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nuniform mat4 perspectiveMatrix;\nuniform mat4 normalMatrix;\n\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\nvarying vec3 lightVec;\n\n\n\n//Based off http://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SIXTH_EDITION/CODE/CHAPTER05/WINDOWS_VERSIONS/vshader56.glsl\nvoid main(){\n    gl_Position = perspectiveMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);    \n  \n   vcoord = (viewMatrix * modelMatrix * vec4(position, 1.0)).xyz;\n   tcoord = texCoord;\n   vNorm = (normalMatrix * vec4(normal, 1.0)).xyz;\n   if (1.0 == 0.0)\n   {\n\tlightVec = pointLightPosition.xyz;\n   }\n   else\n   {\n     lightVec = (pointLightPosition.xyz - vcoord);\n   }\n   //lightVec =  (1.0-pointLightPosition.w) * pointLightPosition.xyz + (pointLightPosition.w)*(pointLightPosition.xyz - vcoord);\n \n \n}\n\n\n"};
+   var testEntity = A3(Graphics.WebGL.entity,
+   fullVertexShader,
+   fullFragmentShader,
+   _L.fromArray([]));
+   var perspectiveForDims = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return A4(Math.Matrix4.makePerspective,
+              45,
+              Basics.toFloat(_v0._0) / Basics.toFloat(_v0._1),
+              1.0e-2,
+              100);}
+         _E.Case($moduleName,
+         "on line 289, column 29 to 80");
+      }();
+   };
+   var ones = A3(Math.Vector3.vec3,
+   1,
+   1,
+   1);
+   var origin = A3(Math.Vector3.vec3,
+   0,
+   0,
+   0);
+   var defaultFullUniforms = function (tex) {
+      return {_: {}
+             ,ambientColor: origin
+             ,ambientTexture: tex
+             ,bumpTexture: tex
+             ,diffuseColor: origin
+             ,diffuseTexture: tex
+             ,globalAmbient: ones
+             ,modelMatrix: Math.Matrix4.identity
+             ,normalMatrix: Math.Matrix4.identity
+             ,perspectiveMatrix: Math.Matrix4.identity
+             ,pointLightDiffuse: origin
+             ,pointLightPosition: origin
+             ,pointLightSpecular: origin
+             ,specularCoeff: 0.0
+             ,specularColor: origin
+             ,specularTexture: tex
+             ,useAmbientColor: 0.0
+             ,useAmbientTexture: 0.0
+             ,useBumpTexture: 0.0
+             ,useDiffuseColor: 0.0
+             ,useDiffuseTexture: 0.0
+             ,useSpecularColor: 0.0
+             ,useSpecularTexture: 0.0
+             ,viewMatrix: Math.Matrix4.identity};
+   };
+   var makeUniforms = F4(function (tex,
+   matProps,
+   objProps,
+   globalProps) {
+      return function () {
+         var perspectiveMatrix = perspectiveForDims(globalProps.screenDims);
+         var viewMatrix = Graphics.Camera.makeView(globalProps.camera);
+         var modelMatrix = Math.Matrix4.mul(Math.Matrix4.makeTranslate(objProps.position))(A2(Math.Matrix4.mul,
+         Math.Matrix4.makeScale(objProps.scaleFactor),
+         Math.Matrix4.makeRotate(objProps.rotation)(A3(Math.Vector3.vec3,
+         0,
+         1,
+         0))));
+         var normalMatrix = function () {
+            var mv = A2(Math.Matrix4.mul,
+            viewMatrix,
+            modelMatrix);
+            return Math.Matrix4.transpose(Math.Matrix4.inverseOrthonormal(mv));
+         }();
+         var uni1 = defaultFullUniforms(tex);
+         var uni2 = function () {
+            var _v4 = matProps.baseColor;
+            switch (_v4.ctor)
+            {case "OneColor":
+               return _U.replace([["ambientColor"
+                                  ,_v4._0]
+                                 ,["useAmbientColor",1]],
+                 uni1);
+               case "TexColor":
+               return _U.replace([["ambientTexture"
+                                  ,_v4._0]
+                                 ,["useAmbientTexture",1]],
+                 uni1);}
+            _E.Case($moduleName,
+            "between lines 296 and 299");
+         }();
+         var uni3 = function () {
+            var _v7 = {ctor: "_Tuple2"
+                      ,_0: matProps.specColor
+                      ,_1: matProps.specCoeff};
+            switch (_v7.ctor)
+            {case "_Tuple2":
+               switch (_v7._0.ctor)
+                 {case "Just":
+                    switch (_v7._0._0.ctor)
+                      {case "OneColor":
+                         switch (_v7._1.ctor)
+                           {case "Just":
+                              return _U.replace([["specularColor"
+                                                 ,_v7._0._0._0]
+                                                ,["useSpecularColor",1]
+                                                ,["specularCoeff",_v7._1._0]],
+                                uni2);}
+                           break;
+                         case "TexColor":
+                         switch (_v7._1.ctor)
+                           {case "Just":
+                              return _U.replace([["specularTexture"
+                                                 ,_v7._0._0._0]
+                                                ,["useSpecularTexture",1]
+                                                ,["specularCoeff",_v7._1._0]],
+                                uni2);}
+                           break;}
+                      break;}
+                 break;}
+            return _U.replace([["useSpecularColor"
+                               ,0]],
+            uni2);
+         }();
+         var uni4 = function () {
+            var _v15 = matProps.diffuseColor;
+            switch (_v15.ctor)
+            {case "Just":
+               switch (_v15._0.ctor)
+                 {case "OneColor":
+                    return _U.replace([["diffuseColor"
+                                       ,_v15._0._0]
+                                      ,["useDiffuseColor",1]],
+                      uni3);
+                    case "TexColor":
+                    return _U.replace([["diffuseTexture"
+                                       ,_v15._0._0]
+                                      ,["useDiffuseTexture",1]],
+                      uni3);}
+                 break;
+               case "Nothing": return uni3;}
+            _E.Case($moduleName,
+            "between lines 303 and 308");
+         }();
+         var u5 = function () {
+            var _v19 = matProps.bumpMap;
+            switch (_v19.ctor)
+            {case "Just":
+               return _U.replace([["bumpTexture"
+                                  ,_v19._0]
+                                 ,["useBumpTexture",1.0]],
+                 uni4);
+               case "Nothing": return uni4;}
+            _E.Case($moduleName,
+            "between lines 308 and 312");
+         }();
+         var u6 = _U.replace([["modelMatrix"
+                              ,modelMatrix]
+                             ,["viewMatrix",viewMatrix]
+                             ,["perspectiveMatrix"
+                              ,perspectiveMatrix]
+                             ,["normalMatrix",normalMatrix]],
+         u5);
+         var u7 = _U.insert("globalAmbient",
+         globalProps.ambientLight,
+         u6);
+         var u8 = function () {
+            var _v21 = globalProps.mainLight;
+            switch (_v21.ctor)
+            {case "PointLight":
+               return _U.replace([["pointLightPosition"
+                                  ,_v21._0.pos]
+                                 ,["pointLightSpecular"
+                                  ,_v21._0.specular]
+                                 ,["pointLightDiffuse"
+                                  ,_v21._0.diffuse]],
+                 u7);}
+            _E.Case($moduleName,
+            "between lines 323 and 327");
+         }();
+         var uFinal = u8;
+         return uFinal;
+      }();
+   });
+   var FullShaderUniforms = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return function (k) {
+                                    return function (l) {
+                                       return function (m) {
+                                          return function (n) {
+                                             return function (o) {
+                                                return function (p) {
+                                                   return function (q) {
+                                                      return function (r) {
+                                                         return function (s) {
+                                                            return function (t) {
+                                                               return function (u) {
+                                                                  return function (v) {
+                                                                     return function (w) {
+                                                                        return {_: {}
+                                                                               ,ambientColor: i
+                                                                               ,ambientTexture: j
+                                                                               ,bumpTexture: v
+                                                                               ,diffuseColor: m
+                                                                               ,diffuseTexture: n
+                                                                               ,globalAmbient: h
+                                                                               ,modelMatrix: a
+                                                                               ,normalMatrix: d
+                                                                               ,perspectiveMatrix: c
+                                                                               ,pointLightDiffuse: g
+                                                                               ,pointLightPosition: e
+                                                                               ,pointLightSpecular: f
+                                                                               ,specularCoeff: u
+                                                                               ,specularColor: q
+                                                                               ,specularTexture: r
+                                                                               ,useAmbientColor: k
+                                                                               ,useAmbientTexture: l
+                                                                               ,useBumpTexture: w
+                                                                               ,useDiffuseColor: o
+                                                                               ,useDiffuseTexture: p
+                                                                               ,useSpecularColor: s
+                                                                               ,useSpecularTexture: t
+                                                                               ,viewMatrix: b};
+                                                                     };
+                                                                  };
+                                                               };
+                                                            };
+                                                         };
+                                                      };
+                                                   };
+                                                };
+                                             };
+                                          };
+                                       };
+                                    };
+                                 };
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
+   var fragmentShaderVTN = {"src": "\n\nprecision mediump float;\nuniform sampler2D texture;\nuniform mat4 normalMatrix;\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\n\nconst vec3 lightPos = vec3(100.0, 100.0, 100.0);\nconst vec3 specColor = vec3(0.1, 0.1, 0.1);\n\nvoid main () {\n\n  // all following gemetric computations are performed in the\n  // camera coordinate system (aka eye coordinates)\n  vec3 adjustedNormal = vec3(normalMatrix * vec4(vNorm, 0.0));\n  vec3 vertPos = vcoord;\n  vec3 lightDir = (lightPos - vertPos);\n  vec3 reflectDir = reflect(-lightDir, adjustedNormal);\n  vec3 viewMatrixDir = (-vertPos);\n  \n  vec3 diffuseColor = 0.25*texture2D(texture, tcoord.xy).xyz;\n  vec3 ambientColor = 1.5*diffuseColor;\n\n  float lambertian = max(dot(lightDir,adjustedNormal), 0.0);\n  float specular = 0.0;\n  \n  if(lambertian > 0.0) {\n    float specAngle = max(dot(reflectDir, viewMatrixDir), 0.0);\n    specular = pow(specAngle, 0.2);\n       \n    \n  }\n  gl_FragColor = vec4((lambertian*diffuseColor + specular*specColor) + ambientColor, 1.0);\n\n\n\n  \n}\n\n"};
+   var vertexShaderVTN = {"src": "\n\nattribute vec3 position;\nattribute vec3 texCoord;\nattribute vec3 normal;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\n\n\nvoid main(){\n  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);\n  \n   vcoord = gl_Position.xyz;\n   tcoord = texCoord;\n   vNorm = normal;\n  \n}\n\n\n"};
+   var fragmentShaderVT = {"src": "\n\nprecision mediump float;\nuniform sampler2D texture;\nvarying vec3 vcoord;\n\nvoid main () {\n  //gl_FragColor = texture2D(texture, vcoord);\n  gl_FragColor  = vec4(0,0,0,1);\n}\n\n"};
+   var vertexShaderVT = {"src": "\n\nattribute vec3 position;\nattribute vec3 texCoord;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nvarying vec3 vcoord;\n\n\nvoid main(){\n  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);\n  \n   vcoord = texCoord;\n  \n}\n\n\n"};
+   var vertexShaderV = {"src": "\n\nattribute vec3 position;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nuniform vec3 inputColor;\nvarying vec3 vcolor;\n\n\nvoid main(){\n  gl_Position = viewMatrix * modelMatrix * vec4(position, 1.0);\n  \n  \n  vcolor = inputColor;\n}\n\n\n"};
+   var vertexShaderVN = {"src": "\n\nattribute vec3 position;\nattribute vec3 normal;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nuniform mat4 normalMatrix;\nuniform vec3 inputColor;\nvarying vec3 vcolor;\n\n\n\nconst vec3 lightPos = vec3(1.0, 1.0, 1.0);\nconst vec3 specColor = vec3(0.2, 0.2, 0.2);\n\nvoid main(){\n\n  vec3 ambientColor = inputColor;\n  vec3 diffuseColor = inputColor;\n  vec4 finalPos = viewMatrix * modelMatrix * vec4(position, 1.0);\n  gl_Position = finalPos;\n\n  // all following gemetric computations are performed in the\n  // camera coordinate system (aka eye coordinates)\n  vec3 adjustedNormal = vec3(normalMatrix * vec4(normal, 0.0));\n  vec4 vertPos4 = viewMatrix * modelMatrix * vec4(position, 1.0);\n  vec3 vertPos = vec3(vertPos4) / vertPos4.w;\n  vec3 lightDir = (lightPos - vertPos);\n  vec3 reflectDir = reflect(-lightDir, adjustedNormal);\n  vec3 viewMatrixDir = (-vertPos);\n\n  float lambertian = max(dot(lightDir,adjustedNormal), 0.0);\n  float specular = 0.0;\n  \n  if(lambertian > 0.0) {\n    float specAngle = max(dot(reflectDir, viewMatrixDir), 0.0);\n    specular = pow(specAngle, 4.0);\n       \n    \n  }\n  vcolor = vec3(lambertian*diffuseColor + specular*specColor) + ambientColor;\n}\n\n\n"};
+   var basicFragShader = {"src": "\n\nprecision mediump float;\nvarying vec3 vcolor;\n\nvoid main () {\n    gl_FragColor = vec4(vcolor, 1.0);\n}\n\n"};
+   var fragmentShaderVN = basicFragShader;
+   var fragmentShaderV = basicFragShader;
+   _elm.Graphics.ObjShaders.values = {_op: _op
+                                     ,basicFragShader: basicFragShader
+                                     ,vertexShaderVN: vertexShaderVN
+                                     ,fragmentShaderVN: fragmentShaderVN
+                                     ,vertexShaderV: vertexShaderV
+                                     ,fragmentShaderV: fragmentShaderV
+                                     ,vertexShaderVT: vertexShaderVT
+                                     ,fragmentShaderVT: fragmentShaderVT
+                                     ,vertexShaderVTN: vertexShaderVTN
+                                     ,fragmentShaderVTN: fragmentShaderVTN
+                                     ,origin: origin
+                                     ,ones: ones
+                                     ,defaultFullUniforms: defaultFullUniforms
+                                     ,perspectiveForDims: perspectiveForDims
+                                     ,makeUniforms: makeUniforms
+                                     ,fullVertexShader: fullVertexShader
+                                     ,fullFragmentShader: fullFragmentShader
+                                     ,testEntity: testEntity
+                                     ,FullShaderUniforms: FullShaderUniforms};
+   return _elm.Graphics.ObjShaders.values;
+};Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.ObjTypes = Elm.Graphics.ObjTypes || {};
+Elm.Graphics.ObjTypes.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.ObjTypes = _elm.Graphics.ObjTypes || {};
+   if (_elm.Graphics.ObjTypes.values)
+   return _elm.Graphics.ObjTypes.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Graphics.ObjTypes";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Camera = Elm.Graphics.Camera.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.WebGL = Elm.Graphics.WebGL.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Math = Math || {};
+   Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
+   var Math = Math || {};
+   Math.Vector4 = Elm.Math.Vector4.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var GlobalProperties = F5(function (a,
+   b,
+   c,
+   d,
+   e) {
+      return {_: {}
+             ,ambientLight: d
+             ,camera: a
+             ,mainLight: e
+             ,screenDims: c
+             ,shadow: b};
+   });
+   var ObjectProperties = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,position: a
+             ,rotation: b
+             ,scaleFactor: c};
+   });
+   var Material = F6(function (a,
+   b,
+   c,
+   d,
+   e,
+   f) {
+      return {_: {}
+             ,baseColor: a
+             ,bumpMap: e
+             ,diffuseColor: b
+             ,reflectivity: f
+             ,specCoeff: d
+             ,specColor: c};
+   });
+   var SunLight = function (a) {
+      return {ctor: "SunLight"
+             ,_0: a};
+   };
+   var PointLight = function (a) {
+      return {ctor: "PointLight"
+             ,_0: a};
+   };
+   var Ortho = {ctor: "Ortho"};
+   var Perspective = {ctor: "Perspective"};
+   var SolidShadows = {ctor: "SolidShadows"};
+   var NoShadows = {ctor: "NoShadows"};
+   var TexColor = function (a) {
+      return {ctor: "TexColor"
+             ,_0: a};
+   };
+   var OneColor = function (a) {
+      return {ctor: "OneColor"
+             ,_0: a};
+   };
+   var FullMaterial = F2(function (a,
+   b) {
+      return {ctor: "FullMaterial"
+             ,_0: a
+             ,_1: b};
+   });
+   var OneTextureMaterial = function (a) {
+      return {ctor: "OneTextureMaterial"
+             ,_0: a};
+   };
+   var OneColorMaterial = function (a) {
+      return {ctor: "OneColorMaterial"
+             ,_0: a};
+   };
+   var VertVTN = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,normal: c
+             ,position: a
+             ,texCoord: b};
+   });
+   var VertVN = F2(function (a,b) {
+      return {_: {}
+             ,normal: b
+             ,position: a};
+   });
+   var VertVT = F2(function (a,b) {
+      return {_: {}
+             ,position: a
+             ,texCoord: b};
+   });
+   var VertV = function (a) {
+      return {_: {},position: a};
+   };
+   _elm.Graphics.ObjTypes.values = {_op: _op
+                                   ,OneColorMaterial: OneColorMaterial
+                                   ,OneTextureMaterial: OneTextureMaterial
+                                   ,FullMaterial: FullMaterial
+                                   ,OneColor: OneColor
+                                   ,TexColor: TexColor
+                                   ,NoShadows: NoShadows
+                                   ,SolidShadows: SolidShadows
+                                   ,Perspective: Perspective
+                                   ,Ortho: Ortho
+                                   ,PointLight: PointLight
+                                   ,SunLight: SunLight
+                                   ,VertV: VertV
+                                   ,VertVT: VertVT
+                                   ,VertVN: VertVN
+                                   ,VertVTN: VertVTN
+                                   ,Material: Material
+                                   ,ObjectProperties: ObjectProperties
+                                   ,GlobalProperties: GlobalProperties};
+   return _elm.Graphics.ObjTypes.values;
+};Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.Camera = Elm.Graphics.Camera || {};
+Elm.Graphics.Camera.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.Camera = _elm.Graphics.Camera || {};
+   if (_elm.Graphics.Camera.values)
+   return _elm.Graphics.Camera.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Graphics.Camera";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Math = Math || {};
+   Math.Matrix4 = Elm.Math.Matrix4.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var ByRotation = function (a) {
+      return {ctor: "ByRotation"
+             ,_0: a};
+   };
+   var InDirection = function (a) {
+      return {ctor: "InDirection"
+             ,_0: a};
+   };
+   var AtPoint = function (a) {
+      return {ctor: "AtPoint"
+             ,_0: a};
+   };
+   var defaultCamera = {_: {}
+                       ,position: A3(Math.Vector3.vec3,
+                       0,
+                       0,
+                       10)
+                       ,whereToLook: AtPoint(A3(Math.Vector3.vec3,
+                       0,
+                       0,
+                       0))
+                       ,zoom: 1.0};
+   var lookAtPoint = function (wtl) {
+      return function () {
+         switch (wtl.ctor)
+         {case "AtPoint": return wtl._0;}
+         return A3(Math.Vector3.vec3,
+         0,
+         0,
+         0);
+      }();
+   };
+   var makeView = function (cam) {
+      return function () {
+         var zoomMatrix = Math.Matrix4.makeScale(A3(Math.Vector3.vec3,
+         cam.zoom,
+         cam.zoom,
+         cam.zoom));
+         var lookMatrix = A3(Math.Matrix4.makeLookAt,
+         cam.position,
+         lookAtPoint(cam.whereToLook),
+         A3(Math.Vector3.vec3,0,1,0));
+         return A2(Math.Matrix4.mul,
+         zoomMatrix,
+         lookMatrix);
+      }();
+   };
+   var Camera = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,position: a
+             ,whereToLook: b
+             ,zoom: c};
+   });
+   _elm.Graphics.Camera.values = {_op: _op
+                                 ,defaultCamera: defaultCamera
+                                 ,lookAtPoint: lookAtPoint
+                                 ,makeView: makeView
+                                 ,AtPoint: AtPoint
+                                 ,InDirection: InDirection
+                                 ,ByRotation: ByRotation
+                                 ,Camera: Camera};
+   return _elm.Graphics.Camera.values;
 };Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.WebGL = Elm.Graphics.WebGL || {};
 Elm.Graphics.WebGL.make = function (_elm) {
@@ -3016,4 +4508,271 @@ Elm.LoadAssets.make = function (_elm) {
                             ,Complete: Complete
                             ,Failed: Failed};
    return _elm.LoadAssets.values;
+};Elm.Math = Elm.Math || {};
+Elm.Math.Matrix4 = Elm.Math.Matrix4 || {};
+Elm.Math.Matrix4.make = function (_elm) {
+   "use strict";
+   _elm.Math = _elm.Math || {};
+   _elm.Math.Matrix4 = _elm.Math.Matrix4 || {};
+   if (_elm.Math.Matrix4.values)
+   return _elm.Math.Matrix4.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Math.Matrix4";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Math = Math || {};
+   Math.Vector3 = Elm.Math.Vector3.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.MJS = Elm.Native.MJS.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var makeBasis = Native.MJS.m4x4makeBasis;
+   var transpose = Native.MJS.m4x4transpose;
+   var makeLookAt = Native.MJS.m4x4makeLookAt;
+   var translate = Native.MJS.m4x4translate;
+   var translate3 = Native.MJS.m4x4translate3;
+   var makeTranslate = Native.MJS.m4x4makeTranslate;
+   var makeTranslate3 = Native.MJS.m4x4makeTranslate3;
+   var scale = Native.MJS.m4x4scale;
+   var scale3 = Native.MJS.m4x4scale3;
+   var makeScale = Native.MJS.m4x4makeScale;
+   var makeScale3 = Native.MJS.m4x4makeScale3;
+   var rotate = Native.MJS.m4x4rotate;
+   var makeRotate = Native.MJS.m4x4makeRotate;
+   var mulAffine = Native.MJS.m4x4mulAffine;
+   var mul = Native.MJS.m4x4mul;
+   var makeOrtho2D = Native.MJS.m4x4makeOrtho2D;
+   var makeOrtho = Native.MJS.m4x4makeOrtho;
+   var makePerspective = Native.MJS.m4x4makePerspective;
+   var makeFrustrum = Native.MJS.m4x4makeFrustrum;
+   var inverseOrthonormal = Native.MJS.m4x4inverseOrthonormal;
+   var identity = Native.MJS.m4x4identity;
+   var transform = Native.MJS.v3mul4x4;
+   var Mat4 = {ctor: "Mat4"};
+   _elm.Math.Matrix4.values = {_op: _op
+                              ,transform: transform
+                              ,identity: identity
+                              ,inverseOrthonormal: inverseOrthonormal
+                              ,makeFrustrum: makeFrustrum
+                              ,makePerspective: makePerspective
+                              ,makeOrtho: makeOrtho
+                              ,makeOrtho2D: makeOrtho2D
+                              ,mul: mul
+                              ,mulAffine: mulAffine
+                              ,makeRotate: makeRotate
+                              ,rotate: rotate
+                              ,makeScale3: makeScale3
+                              ,makeScale: makeScale
+                              ,scale3: scale3
+                              ,scale: scale
+                              ,makeTranslate3: makeTranslate3
+                              ,makeTranslate: makeTranslate
+                              ,translate3: translate3
+                              ,translate: translate
+                              ,makeLookAt: makeLookAt
+                              ,transpose: transpose
+                              ,makeBasis: makeBasis
+                              ,Mat4: Mat4};
+   return _elm.Math.Matrix4.values;
+};Elm.Math = Elm.Math || {};
+Elm.Math.Vector3 = Elm.Math.Vector3 || {};
+Elm.Math.Vector3.make = function (_elm) {
+   "use strict";
+   _elm.Math = _elm.Math || {};
+   _elm.Math.Vector3 = _elm.Math.Vector3 || {};
+   if (_elm.Math.Vector3.values)
+   return _elm.Math.Vector3.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Math.Vector3";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.MJS = Elm.Native.MJS.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var cross = Native.MJS.v3cross;
+   var dot = Native.MJS.v3dot;
+   var scale = Native.MJS.v3scale;
+   var normalize = Native.MJS.v3normalize;
+   var distanceSquared = Native.MJS.v3distanceSquared;
+   var distance = Native.MJS.v3distance;
+   var lengthSquared = Native.MJS.v3lengthSquared;
+   var length = Native.MJS.v3length;
+   var direction = Native.MJS.v3direction;
+   var negate = Native.MJS.v3neg;
+   var sub = Native.MJS.v3sub;
+   var add = Native.MJS.v3add;
+   var fromRecord = Native.MJS.fromRecord3;
+   var fromTuple = Native.MJS.fromTuple3;
+   var toRecord = Native.MJS.toRecord3;
+   var toTuple = Native.MJS.toTuple3;
+   var setZ = Native.MJS.v3setZ;
+   var setY = Native.MJS.v3setY;
+   var setX = Native.MJS.v3setX;
+   var getZ = Native.MJS.v3getZ;
+   var getY = Native.MJS.v3getY;
+   var getX = Native.MJS.v3getX;
+   var k = A3(Native.MJS.vec3,
+   0,
+   0,
+   1);
+   var j = A3(Native.MJS.vec3,
+   0,
+   1,
+   0);
+   var i = A3(Native.MJS.vec3,
+   1,
+   0,
+   0);
+   var vec3 = Native.MJS.vec3;
+   var Vec3 = {ctor: "Vec3"};
+   _elm.Math.Vector3.values = {_op: _op
+                              ,vec3: vec3
+                              ,i: i
+                              ,j: j
+                              ,k: k
+                              ,getX: getX
+                              ,getY: getY
+                              ,getZ: getZ
+                              ,setX: setX
+                              ,setY: setY
+                              ,setZ: setZ
+                              ,toTuple: toTuple
+                              ,toRecord: toRecord
+                              ,fromTuple: fromTuple
+                              ,fromRecord: fromRecord
+                              ,add: add
+                              ,sub: sub
+                              ,negate: negate
+                              ,direction: direction
+                              ,length: length
+                              ,lengthSquared: lengthSquared
+                              ,distance: distance
+                              ,distanceSquared: distanceSquared
+                              ,normalize: normalize
+                              ,scale: scale
+                              ,dot: dot
+                              ,cross: cross
+                              ,Vec3: Vec3};
+   return _elm.Math.Vector3.values;
+};Elm.Math = Elm.Math || {};
+Elm.Math.Vector4 = Elm.Math.Vector4 || {};
+Elm.Math.Vector4.make = function (_elm) {
+   "use strict";
+   _elm.Math = _elm.Math || {};
+   _elm.Math.Vector4 = _elm.Math.Vector4 || {};
+   if (_elm.Math.Vector4.values)
+   return _elm.Math.Vector4.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Math.Vector4";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Json = Elm.Native.Json.make(_elm);
+   var Native = Native || {};
+   Native.Math = Native.Math || {};
+   Native.Math.Vector4 = Elm.Native.Math.Vector4.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var dot = Native.Math.Vector4.dot;
+   var scale = Native.Math.Vector4.scale;
+   var normalize = Native.Math.Vector4.normalize;
+   var distanceSquared = Native.Math.Vector4.distanceSquared;
+   var distance = Native.Math.Vector4.distance;
+   var lengthSquared = Native.Math.Vector4.lengthSquared;
+   var length = Native.Math.Vector4.length;
+   var direction = Native.Math.Vector4.direction;
+   var negate = Native.Math.Vector4.neg;
+   var sub = Native.Math.Vector4.sub;
+   var add = Native.Math.Vector4.add;
+   var fromRecord = Native.Math.Vector4.fromRecord;
+   var fromTuple = Native.Math.Vector4.fromTuple;
+   var toRecord = Native.Math.Vector4.toRecord;
+   var toTuple = Native.Math.Vector4.toTuple;
+   var setW = Native.Math.Vector4.setW;
+   var setZ = Native.Math.Vector4.setZ;
+   var setY = Native.Math.Vector4.setY;
+   var setX = Native.Math.Vector4.setX;
+   var getW = Native.Math.Vector4.getW;
+   var getZ = Native.Math.Vector4.getZ;
+   var getY = Native.Math.Vector4.getY;
+   var getX = Native.Math.Vector4.getX;
+   var vec4 = Native.Math.Vector4.vec4;
+   var Vec4 = {ctor: "Vec4"};
+   _elm.Math.Vector4.values = {_op: _op
+                              ,vec4: vec4
+                              ,getX: getX
+                              ,getY: getY
+                              ,getZ: getZ
+                              ,getW: getW
+                              ,setX: setX
+                              ,setY: setY
+                              ,setZ: setZ
+                              ,setW: setW
+                              ,toTuple: toTuple
+                              ,toRecord: toRecord
+                              ,fromTuple: fromTuple
+                              ,fromRecord: fromRecord
+                              ,add: add
+                              ,sub: sub
+                              ,negate: negate
+                              ,direction: direction
+                              ,length: length
+                              ,lengthSquared: lengthSquared
+                              ,distance: distance
+                              ,distanceSquared: distanceSquared
+                              ,normalize: normalize
+                              ,scale: scale
+                              ,dot: dot
+                              ,Vec4: Vec4};
+   return _elm.Math.Vector4.values;
 };</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script><noscript></noscript></body></html>
