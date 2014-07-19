@@ -2847,7 +2847,7 @@ Elm.Graphics.ObjParser.make = function (_elm) {
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
    var _op = {};
-   var emptyModel = Graphics.ObjParserInternal.EmptyModel;
+   var emptyModel = Graphics.ObjTypes.EmptyModel;
    var toEntity = Graphics.ObjParserInternal.toEntity;
    var toModel = Graphics.ObjParserInternal.toModel;
    _elm.Graphics.ObjParser.values = {_op: _op
@@ -2905,7 +2905,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
          switch (_v0.ctor)
          {case "Just": return _v0._0;}
          _E.Case($moduleName,
-         "on line 186, column 21 to 22");
+         "on line 174, column 21 to 22");
       }();
    };
    var deIndexVert = F2(function (vArr,
@@ -2915,6 +2915,129 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
          return A2(Array.getOrFail,
          i - 1,
          vArr);
+      }();
+   });
+   var parseFaceVert = F2(function (_v3,
+   str) {
+      return function () {
+         switch (_v3.ctor)
+         {case "_Tuple3":
+            return function () {
+                 var _v8 = A2(String.split,
+                 "//",
+                 str);
+                 switch (_v8.ctor)
+                 {case "::": switch (_v8._1.ctor)
+                      {case "::":
+                         switch (_v8._1._1.ctor)
+                           {case "[]":
+                              return Graphics.ObjTypes.FaceVertVN(A2(Graphics.ObjTypes.VertVN,
+                                A2(deIndexVert,_v3._0,_v8._0),
+                                A2(deIndexVert,
+                                _v3._2,
+                                _v8._1._0)));}
+                           break;
+                         case "[]": return function () {
+                              var _v13 = A2(String.split,
+                              "/",
+                              _v8._0);
+                              switch (_v13.ctor)
+                              {case "::":
+                                 switch (_v13._1.ctor)
+                                   {case "::":
+                                      switch (_v13._1._1.ctor)
+                                        {case "::":
+                                           switch (_v13._1._1._1.ctor)
+                                             {case "[]":
+                                                return Graphics.ObjTypes.FaceVertVTN(A3(Graphics.ObjTypes.VertVTN,
+                                                  A2(deIndexVert,
+                                                  _v3._0,
+                                                  _v13._0),
+                                                  A2(deIndexVert,
+                                                  _v3._1,
+                                                  _v13._1._0),
+                                                  A2(deIndexVert,
+                                                  _v3._2,
+                                                  _v13._1._1._0)));}
+                                             break;
+                                           case "[]":
+                                           return Graphics.ObjTypes.FaceVertVT(A2(Graphics.ObjTypes.VertVT,
+                                             A2(deIndexVert,_v3._0,_v13._0),
+                                             A2(deIndexVert,
+                                             _v3._1,
+                                             _v13._1._0)));}
+                                        break;
+                                      case "[]":
+                                      return Graphics.ObjTypes.FaceVertV(Graphics.ObjTypes.VertV(A2(deIndexVert,
+                                        _v3._0,
+                                        _v13._0)));}
+                                   break;}
+                              _E.Case($moduleName,
+                              "between lines 170 and 173");
+                           }();}
+                      break;}
+                 _E.Case($moduleName,
+                 "between lines 168 and 173");
+              }();}
+         _E.Case($moduleName,
+         "between lines 168 and 173");
+      }();
+   });
+   var lineToFace = F2(function (arrs,
+   line) {
+      return function () {
+         var _v20 = String.words(line);
+         switch (_v20.ctor)
+         {case "::": switch (_v20._0)
+              {case "f": switch (_v20._1.ctor)
+                   {case "::":
+                      switch (_v20._1._1.ctor)
+                        {case "::":
+                           switch (_v20._1._1._1.ctor)
+                             {case "::":
+                                switch (_v20._1._1._1._1.ctor)
+                                  {case "::":
+                                     switch (_v20._1._1._1._1._1.ctor)
+                                       {case "[]":
+                                          return _L.fromArray([{ctor: "_Tuple3"
+                                                               ,_0: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v20._1._0)
+                                                               ,_1: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v20._1._1._0)
+                                                               ,_2: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v20._1._1._1._0)}
+                                                              ,{ctor: "_Tuple3"
+                                                               ,_0: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v20._1._1._0)
+                                                               ,_1: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v20._1._1._1._0)
+                                                               ,_2: A2(parseFaceVert,
+                                                               arrs,
+                                                               _v20._1._1._1._1._0)}]);}
+                                       break;
+                                     case "[]":
+                                     return _L.fromArray([{ctor: "_Tuple3"
+                                                          ,_0: A2(parseFaceVert,
+                                                          arrs,
+                                                          _v20._1._0)
+                                                          ,_1: A2(parseFaceVert,
+                                                          arrs,
+                                                          _v20._1._1._0)
+                                                          ,_2: A2(parseFaceVert,
+                                                          arrs,
+                                                          _v20._1._1._1._0)}]);}
+                                  break;}
+                             break;}
+                        break;}
+                   break;}
+              break;}
+         _E.Case($moduleName,
+         "between lines 159 and 163");
       }();
    });
    var isFaceLine = function (s) {
@@ -2945,113 +3068,147 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
       0) > 0 ? b * A2(myPow,
       b,
       e - 1) : _E.If($moduleName,
-      "between lines 138 and 141");
+      "between lines 126 and 129");
    });
    var parseFloat = function (s) {
       return function () {
-         var _v3 = A2(String.split,
+         var _v31 = A2(String.split,
          "e",
          s);
-         switch (_v3.ctor)
-         {case "::": switch (_v3._1.ctor)
+         switch (_v31.ctor)
+         {case "::":
+            switch (_v31._1.ctor)
               {case "::":
-                 switch (_v3._1._1.ctor)
+                 switch (_v31._1._1.ctor)
                    {case "[]": return function () {
-                           var pi = fromJust(String.toInt(_v3._1._0));
-                           var bf = fromJust(String.toFloat(_v3._0));
+                           var pi = fromJust(String.toInt(_v31._1._0));
+                           var bf = fromJust(String.toFloat(_v31._0));
                            return bf * A2(myPow,10.0,pi);
                         }();}
                    break;
                  case "[]":
-                 return fromJust(String.toFloat(_v3._0));}
+                 return fromJust(String.toFloat(_v31._0));}
               break;}
          _E.Case($moduleName,
-         "between lines 145 and 150");
+         "between lines 133 and 138");
       }();
    };
    var lineToVert = function (line) {
       return function () {
-         var _v8 = String.words(line);
-         switch (_v8.ctor)
-         {case "::": switch (_v8._0)
-              {case "v": switch (_v8._1.ctor)
+         var _v36 = String.words(line);
+         switch (_v36.ctor)
+         {case "::": switch (_v36._0)
+              {case "v": switch (_v36._1.ctor)
                    {case "::":
-                      switch (_v8._1._1.ctor)
+                      switch (_v36._1._1.ctor)
                         {case "::":
-                           switch (_v8._1._1._1.ctor)
+                           switch (_v36._1._1._1.ctor)
                              {case "::":
-                                switch (_v8._1._1._1._1.ctor)
+                                switch (_v36._1._1._1._1.ctor)
                                   {case "[]":
                                      return A3(Math.Vector3.vec3,
-                                       parseFloat(_v8._1._0),
-                                       parseFloat(_v8._1._1._0),
-                                       parseFloat(_v8._1._1._1._0));}
+                                       parseFloat(_v36._1._0),
+                                       parseFloat(_v36._1._1._0),
+                                       parseFloat(_v36._1._1._1._0));}
                                   break;}
                              break;}
                         break;}
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 160 and 162");
+         "between lines 148 and 150");
       }();
    };
    var lineToVn = function (line) {
       return function () {
-         var _v17 = String.words(line);
-         switch (_v17.ctor)
-         {case "::": switch (_v17._0)
+         var _v45 = String.words(line);
+         switch (_v45.ctor)
+         {case "::": switch (_v45._0)
               {case "vn":
-                 switch (_v17._1.ctor)
+                 switch (_v45._1.ctor)
                    {case "::":
-                      switch (_v17._1._1.ctor)
+                      switch (_v45._1._1.ctor)
                         {case "::":
-                           switch (_v17._1._1._1.ctor)
+                           switch (_v45._1._1._1.ctor)
                              {case "::":
-                                switch (_v17._1._1._1._1.ctor)
+                                switch (_v45._1._1._1._1.ctor)
                                   {case "[]":
                                      return A3(Math.Vector3.vec3,
-                                       parseFloat(_v17._1._0),
-                                       parseFloat(_v17._1._1._0),
-                                       parseFloat(_v17._1._1._1._0));}
+                                       parseFloat(_v45._1._0),
+                                       parseFloat(_v45._1._1._0),
+                                       parseFloat(_v45._1._1._1._0));}
                                   break;}
                              break;}
                         break;}
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 163 and 165");
+         "between lines 151 and 153");
       }();
    };
    var lineToVt = function (line) {
       return function () {
-         var _v26 = String.words(line);
-         switch (_v26.ctor)
-         {case "::": switch (_v26._0)
+         var _v54 = String.words(line);
+         switch (_v54.ctor)
+         {case "::": switch (_v54._0)
               {case "vt":
-                 switch (_v26._1.ctor)
+                 switch (_v54._1.ctor)
                    {case "::":
-                      switch (_v26._1._1.ctor)
+                      switch (_v54._1._1.ctor)
                         {case "::":
-                           switch (_v26._1._1._1.ctor)
+                           switch (_v54._1._1._1.ctor)
                              {case "::":
-                                switch (_v26._1._1._1._1.ctor)
+                                switch (_v54._1._1._1._1.ctor)
                                   {case "[]":
                                      return A3(Math.Vector3.vec3,
-                                       parseFloat(_v26._1._0),
-                                       parseFloat(_v26._1._1._0),
-                                       parseFloat(_v26._1._1._1._0));}
+                                       parseFloat(_v54._1._0),
+                                       parseFloat(_v54._1._1._0),
+                                       parseFloat(_v54._1._1._1._0));}
                                   break;
                                 case "[]":
                                 return A3(Math.Vector3.vec3,
-                                  parseFloat(_v26._1._0),
-                                  parseFloat(_v26._1._1._0),
+                                  parseFloat(_v54._1._0),
+                                  parseFloat(_v54._1._1._0),
                                   0.0);}
                              break;}
                         break;}
                    break;}
               break;}
          _E.Case($moduleName,
-         "between lines 166 and 168");
+         "between lines 154 and 156");
+      }();
+   };
+   var parseObj = function (inFile) {
+      return function () {
+         var lines = String.lines(inFile);
+         var vLines = A2(List.filter,
+         isVertexLine,
+         lines);
+         var vertices = Array.fromList(A2(List.map,
+         lineToVert,
+         vLines));
+         var vtLines = A2(List.filter,
+         isVtLine,
+         lines);
+         var texCoords = Array.fromList(A2(List.map,
+         lineToVt,
+         vtLines));
+         var vnLines = A2(List.filter,
+         isVnLine,
+         lines);
+         var normals = Array.fromList(A2(List.map,
+         lineToVn,
+         vnLines));
+         var fLines = A2(List.filter,
+         isFaceLine,
+         lines);
+         var faces = List.concat(A2(List.map,
+         lineToFace({ctor: "_Tuple3"
+                    ,_0: vertices
+                    ,_1: texCoords
+                    ,_2: normals}),
+         fLines));
+         return faces;
       }();
    };
    var FaceVTN = function (a) {
@@ -3069,58 +3226,99 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
    var FaceV = function (a) {
       return {ctor: "FaceV",_0: a};
    };
-   var triToList = function (_v35) {
+   var toVTN = function (f) {
       return function () {
-         switch (_v35.ctor)
-         {case "_Tuple3":
-            return _L.fromArray([_v35._0
-                                ,_v35._1
-                                ,_v35._2]);}
+         switch (f.ctor)
+         {case "FaceVertVN":
+            return {_: {}
+                   ,normal: f._0.normal
+                   ,position: f._0.position
+                   ,texCoord: A3(Math.Vector3.vec3,
+                   0,
+                   0,
+                   0)};
+            case "FaceVertVTN":
+            return f._0;}
          _E.Case($moduleName,
-         "on line 48, column 21 to 28");
+         "between lines 115 and 117");
       }();
    };
-   var normal = function (unis) {
+   var toVN = function (face) {
       return function () {
-         var mv = A2(Math.Matrix4.mul,
-         unis.viewMatrix,
-         unis.modelMatrix);
-         return Math.Matrix4.transpose(Math.Matrix4.inverseOrthonormal(unis.modelMatrix));
+         switch (face.ctor)
+         {case "FaceVertVN":
+            return face._0;
+            case "FaceVertVTN":
+            return {_: {}
+                   ,normal: face._0.normal
+                   ,position: face._0.position};}
+         _E.Case($moduleName,
+         "between lines 110 and 112");
       }();
    };
-   var EmptyModel = {ctor: "EmptyModel"};
-   var MaterialModel = F3(function (a,
-   b,
-   c) {
-      return {ctor: "MaterialModel"
-             ,_0: a
-             ,_1: b
-             ,_2: c};
-   });
-   var SmoothTextured = F2(function (a,
-   b) {
-      return {ctor: "SmoothTextured"
-             ,_0: a
-             ,_1: b};
-   });
-   var SmoothColored = F2(function (a,
-   b) {
-      return {ctor: "SmoothColored"
-             ,_0: a
-             ,_1: b};
-   });
-   var FlatTextured = F2(function (a,
-   b) {
-      return {ctor: "FlatTextured"
-             ,_0: a
-             ,_1: b};
-   });
-   var FlatColored = F2(function (a,
-   b) {
-      return {ctor: "FlatColored"
-             ,_0: a
-             ,_1: b};
-   });
+   var toVT = function (face) {
+      return function () {
+         switch (face.ctor)
+         {case "FaceVertVT":
+            return face._0;
+            case "FaceVertVTN":
+            return {_: {}
+                   ,position: face._0.position
+                   ,texCoord: face._0.texCoord};}
+         _E.Case($moduleName,
+         "between lines 105 and 108");
+      }();
+   };
+   var toV = function (face) {
+      return function () {
+         switch (face.ctor)
+         {case "FaceVertV":
+            return face._0;
+            case "FaceVertVN": return {_: {}
+                                      ,position: face._0.position};
+            case "FaceVertVT": return {_: {}
+                                      ,position: face._0.position};
+            case "FaceVertVTN":
+            return {_: {}
+                   ,position: face._0.position};}
+         _E.Case($moduleName,
+         "between lines 98 and 102");
+      }();
+   };
+   var isV = function (vert) {
+      return function () {
+         switch (vert.ctor)
+         {case "FaceVertV": return true;}
+         return false;
+      }();
+   };
+   var containsV = function (l) {
+      return A2(List.any,isV,l);
+   };
+   var containsVT = function (l) {
+      return function () {
+         switch (l.ctor)
+         {case "::": switch (l._0.ctor)
+              {case "FaceVertVT":
+                 return true;}
+              return containsV(l._1);
+            case "[]": return false;}
+         _E.Case($moduleName,
+         "between lines 85 and 88");
+      }();
+   };
+   var containsVN = function (l) {
+      return function () {
+         switch (l.ctor)
+         {case "::": switch (l._0.ctor)
+              {case "FaceVertVN":
+                 return true;}
+              return containsV(l._1);
+            case "[]": return false;}
+         _E.Case($moduleName,
+         "between lines 91 and 94");
+      }();
+   };
    var toEntity = F3(function (model,
    objProps,
    globalProps) {
@@ -3202,274 +3400,19 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                  model._1.texture,
                  uniforms));}
             _E.Case($moduleName,
-            "between lines 75 and 85");
+            "between lines 63 and 73");
          }();
       }();
    });
-   var FaceVertVTN = function (a) {
-      return {ctor: "FaceVertVTN"
-             ,_0: a};
-   };
-   var FaceVertVN = function (a) {
-      return {ctor: "FaceVertVN"
-             ,_0: a};
-   };
-   var toVN = function (face) {
+   var triToList = function (_v99) {
       return function () {
-         switch (face.ctor)
-         {case "FaceVertVN":
-            return face._0;
-            case "FaceVertVTN":
-            return {_: {}
-                   ,normal: face._0.normal
-                   ,position: face._0.position};}
-         _E.Case($moduleName,
-         "between lines 122 and 124");
-      }();
-   };
-   var toVTN = function (f) {
-      return function () {
-         switch (f.ctor)
-         {case "FaceVertVN":
-            return {_: {}
-                   ,normal: f._0.normal
-                   ,position: f._0.position
-                   ,texCoord: A3(Math.Vector3.vec3,
-                   0,
-                   0,
-                   0)};
-            case "FaceVertVTN":
-            return f._0;}
-         _E.Case($moduleName,
-         "between lines 127 and 129");
-      }();
-   };
-   var FaceVertVT = function (a) {
-      return {ctor: "FaceVertVT"
-             ,_0: a};
-   };
-   var toVT = function (face) {
-      return function () {
-         switch (face.ctor)
-         {case "FaceVertVT":
-            return face._0;
-            case "FaceVertVTN":
-            return {_: {}
-                   ,position: face._0.position
-                   ,texCoord: face._0.texCoord};}
-         _E.Case($moduleName,
-         "between lines 117 and 120");
-      }();
-   };
-   var FaceVertV = function (a) {
-      return {ctor: "FaceVertV"
-             ,_0: a};
-   };
-   var isV = function (vert) {
-      return function () {
-         switch (vert.ctor)
-         {case "FaceVertV": return true;}
-         return false;
-      }();
-   };
-   var containsV = function (l) {
-      return A2(List.any,isV,l);
-   };
-   var containsVT = function (l) {
-      return function () {
-         switch (l.ctor)
-         {case "::": switch (l._0.ctor)
-              {case "FaceVertVT":
-                 return true;}
-              return containsV(l._1);
-            case "[]": return false;}
-         _E.Case($moduleName,
-         "between lines 97 and 100");
-      }();
-   };
-   var containsVN = function (l) {
-      return function () {
-         switch (l.ctor)
-         {case "::": switch (l._0.ctor)
-              {case "FaceVertVN":
-                 return true;}
-              return containsV(l._1);
-            case "[]": return false;}
-         _E.Case($moduleName,
-         "between lines 103 and 106");
-      }();
-   };
-   var toV = function (face) {
-      return function () {
-         switch (face.ctor)
-         {case "FaceVertV":
-            return face._0;
-            case "FaceVertVN": return {_: {}
-                                      ,position: face._0.position};
-            case "FaceVertVT": return {_: {}
-                                      ,position: face._0.position};
-            case "FaceVertVTN":
-            return {_: {}
-                   ,position: face._0.position};}
-         _E.Case($moduleName,
-         "between lines 110 and 114");
-      }();
-   };
-   var parseFaceVert = F2(function (_v76,
-   str) {
-      return function () {
-         switch (_v76.ctor)
+         switch (_v99.ctor)
          {case "_Tuple3":
-            return function () {
-                 var _v81 = A2(String.split,
-                 "//",
-                 str);
-                 switch (_v81.ctor)
-                 {case "::":
-                    switch (_v81._1.ctor)
-                      {case "::":
-                         switch (_v81._1._1.ctor)
-                           {case "[]":
-                              return FaceVertVN(A2(Graphics.ObjTypes.VertVN,
-                                A2(deIndexVert,_v76._0,_v81._0),
-                                A2(deIndexVert,
-                                _v76._2,
-                                _v81._1._0)));}
-                           break;
-                         case "[]": return function () {
-                              var _v86 = A2(String.split,
-                              "/",
-                              _v81._0);
-                              switch (_v86.ctor)
-                              {case "::":
-                                 switch (_v86._1.ctor)
-                                   {case "::":
-                                      switch (_v86._1._1.ctor)
-                                        {case "::":
-                                           switch (_v86._1._1._1.ctor)
-                                             {case "[]":
-                                                return FaceVertVTN(A3(Graphics.ObjTypes.VertVTN,
-                                                  A2(deIndexVert,
-                                                  _v76._0,
-                                                  _v86._0),
-                                                  A2(deIndexVert,
-                                                  _v76._1,
-                                                  _v86._1._0),
-                                                  A2(deIndexVert,
-                                                  _v76._2,
-                                                  _v86._1._1._0)));}
-                                             break;
-                                           case "[]":
-                                           return FaceVertVT(A2(Graphics.ObjTypes.VertVT,
-                                             A2(deIndexVert,_v76._0,_v86._0),
-                                             A2(deIndexVert,
-                                             _v76._1,
-                                             _v86._1._0)));}
-                                        break;
-                                      case "[]":
-                                      return FaceVertV(Graphics.ObjTypes.VertV(A2(deIndexVert,
-                                        _v76._0,
-                                        _v86._0)));}
-                                   break;}
-                              _E.Case($moduleName,
-                              "between lines 182 and 185");
-                           }();}
-                      break;}
-                 _E.Case($moduleName,
-                 "between lines 180 and 185");
-              }();}
+            return _L.fromArray([_v99._0
+                                ,_v99._1
+                                ,_v99._2]);}
          _E.Case($moduleName,
-         "between lines 180 and 185");
-      }();
-   });
-   var lineToFace = F2(function (arrs,
-   line) {
-      return function () {
-         var _v93 = String.words(line);
-         switch (_v93.ctor)
-         {case "::": switch (_v93._0)
-              {case "f": switch (_v93._1.ctor)
-                   {case "::":
-                      switch (_v93._1._1.ctor)
-                        {case "::":
-                           switch (_v93._1._1._1.ctor)
-                             {case "::":
-                                switch (_v93._1._1._1._1.ctor)
-                                  {case "::":
-                                     switch (_v93._1._1._1._1._1.ctor)
-                                       {case "[]":
-                                          return _L.fromArray([{ctor: "_Tuple3"
-                                                               ,_0: A2(parseFaceVert,
-                                                               arrs,
-                                                               _v93._1._0)
-                                                               ,_1: A2(parseFaceVert,
-                                                               arrs,
-                                                               _v93._1._1._0)
-                                                               ,_2: A2(parseFaceVert,
-                                                               arrs,
-                                                               _v93._1._1._1._0)}
-                                                              ,{ctor: "_Tuple3"
-                                                               ,_0: A2(parseFaceVert,
-                                                               arrs,
-                                                               _v93._1._1._0)
-                                                               ,_1: A2(parseFaceVert,
-                                                               arrs,
-                                                               _v93._1._1._1._0)
-                                                               ,_2: A2(parseFaceVert,
-                                                               arrs,
-                                                               _v93._1._1._1._1._0)}]);}
-                                       break;
-                                     case "[]":
-                                     return _L.fromArray([{ctor: "_Tuple3"
-                                                          ,_0: A2(parseFaceVert,
-                                                          arrs,
-                                                          _v93._1._0)
-                                                          ,_1: A2(parseFaceVert,
-                                                          arrs,
-                                                          _v93._1._1._0)
-                                                          ,_2: A2(parseFaceVert,
-                                                          arrs,
-                                                          _v93._1._1._1._0)}]);}
-                                  break;}
-                             break;}
-                        break;}
-                   break;}
-              break;}
-         _E.Case($moduleName,
-         "between lines 171 and 175");
-      }();
-   });
-   var parseObj = function (inFile) {
-      return function () {
-         var lines = String.lines(inFile);
-         var vLines = A2(List.filter,
-         isVertexLine,
-         lines);
-         var vertices = Array.fromList(A2(List.map,
-         lineToVert,
-         vLines));
-         var vtLines = A2(List.filter,
-         isVtLine,
-         lines);
-         var texCoords = Array.fromList(A2(List.map,
-         lineToVt,
-         vtLines));
-         var vnLines = A2(List.filter,
-         isVnLine,
-         lines);
-         var normals = Array.fromList(A2(List.map,
-         lineToVn,
-         vnLines));
-         var fLines = A2(List.filter,
-         isFaceLine,
-         lines);
-         var faces = List.concat(A2(List.map,
-         lineToFace({ctor: "_Tuple3"
-                    ,_0: vertices
-                    ,_1: texCoords
-                    ,_2: normals}),
-         fLines));
-         return faces;
+         "on line 36, column 21 to 28");
       }();
    };
    var toModel = F2(function (objSource,
@@ -3491,7 +3434,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                  {case true:
                     switch (_v104._3.ctor)
                       {case "OneColorMaterial":
-                         return A2(FlatColored,
+                         return A2(Graphics.ObjTypes.FlatColored,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toV),
                            triangles),
@@ -3502,7 +3445,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                       {case true:
                          switch (_v104._3.ctor)
                            {case "OneColorMaterial":
-                              return A2(FlatColored,
+                              return A2(Graphics.ObjTypes.FlatColored,
                                 A2(List.map,
                                 Graphics.WebGL.mapTriangle(toV),
                                 triangles),
@@ -3510,13 +3453,13 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                            break;}
                       switch (_v104._3.ctor)
                       {case "OneColorMaterial":
-                         return A2(FlatColored,
+                         return A2(Graphics.ObjTypes.FlatColored,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toV),
                            triangles),
                            {_: {},color: _v104._3._0});
                          case "OneTextureMaterial":
-                         return A2(FlatTextured,
+                         return A2(Graphics.ObjTypes.FlatTextured,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toVT),
                            triangles),
@@ -3526,7 +3469,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                  {case true:
                     switch (_v104._3.ctor)
                       {case "OneColorMaterial":
-                         return A2(SmoothColored,
+                         return A2(Graphics.ObjTypes.SmoothColored,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toVN),
                            triangles),
@@ -3538,20 +3481,20 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                            {case false:
                               switch (_v104._3.ctor)
                                 {case "FullMaterial":
-                                   return A3(MaterialModel,
+                                   return A3(Graphics.ObjTypes.MaterialModel,
                                      A2(List.map,
                                      Graphics.WebGL.mapTriangle(toVTN),
                                      triangles),
                                      _v104._3._0,
                                      _v104._3._1);
                                    case "OneColorMaterial":
-                                   return A2(SmoothColored,
+                                   return A2(Graphics.ObjTypes.SmoothColored,
                                      A2(List.map,
                                      Graphics.WebGL.mapTriangle(toVN),
                                      triangles),
                                      {_: {},color: _v104._3._0});
                                    case "OneTextureMaterial":
-                                   return A2(SmoothTextured,
+                                   return A2(Graphics.ObjTypes.SmoothTextured,
                                      A2(List.map,
                                      Graphics.WebGL.mapTriangle(toVTN),
                                      triangles),
@@ -3560,7 +3503,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                            break;}
                       break;}
                  break;}
-            return A2(FlatColored,
+            return A2(Graphics.ObjTypes.FlatColored,
             A2(List.map,
             Graphics.WebGL.mapTriangle(toV),
             triangles),
@@ -3572,6 +3515,14 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
          }();
       }();
    });
+   var normal = function (unis) {
+      return function () {
+         var mv = A2(Math.Matrix4.mul,
+         unis.viewMatrix,
+         unis.modelMatrix);
+         return Math.Matrix4.transpose(Math.Matrix4.inverseOrthonormal(unis.modelMatrix));
+      }();
+   };
    _elm.Graphics.ObjParserInternal.values = {_op: _op
                                             ,normal: normal
                                             ,triToList: triToList
@@ -3599,16 +3550,6 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                                             ,fromJust: fromJust
                                             ,deIndexVert: deIndexVert
                                             ,parseObj: parseObj
-                                            ,FaceVertV: FaceVertV
-                                            ,FaceVertVT: FaceVertVT
-                                            ,FaceVertVN: FaceVertVN
-                                            ,FaceVertVTN: FaceVertVTN
-                                            ,FlatColored: FlatColored
-                                            ,FlatTextured: FlatTextured
-                                            ,SmoothColored: SmoothColored
-                                            ,SmoothTextured: SmoothTextured
-                                            ,MaterialModel: MaterialModel
-                                            ,EmptyModel: EmptyModel
                                             ,FaceV: FaceV
                                             ,FaceVT: FaceVT
                                             ,FaceVN: FaceVN
@@ -3982,6 +3923,55 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
    var _op = {};
+   var EmptyModel = {ctor: "EmptyModel"};
+   var MaterialModel = F3(function (a,
+   b,
+   c) {
+      return {ctor: "MaterialModel"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
+   });
+   var SmoothTextured = F2(function (a,
+   b) {
+      return {ctor: "SmoothTextured"
+             ,_0: a
+             ,_1: b};
+   });
+   var SmoothColored = F2(function (a,
+   b) {
+      return {ctor: "SmoothColored"
+             ,_0: a
+             ,_1: b};
+   });
+   var FlatTextured = F2(function (a,
+   b) {
+      return {ctor: "FlatTextured"
+             ,_0: a
+             ,_1: b};
+   });
+   var FlatColored = F2(function (a,
+   b) {
+      return {ctor: "FlatColored"
+             ,_0: a
+             ,_1: b};
+   });
+   var FaceVertVTN = function (a) {
+      return {ctor: "FaceVertVTN"
+             ,_0: a};
+   };
+   var FaceVertVN = function (a) {
+      return {ctor: "FaceVertVN"
+             ,_0: a};
+   };
+   var FaceVertVT = function (a) {
+      return {ctor: "FaceVertVT"
+             ,_0: a};
+   };
+   var FaceVertV = function (a) {
+      return {ctor: "FaceVertV"
+             ,_0: a};
+   };
    var GlobalProperties = F5(function (a,
    b,
    c,
@@ -4083,6 +4073,16 @@ Elm.Graphics.ObjTypes.make = function (_elm) {
                                    ,Ortho: Ortho
                                    ,PointLight: PointLight
                                    ,SunLight: SunLight
+                                   ,FaceVertV: FaceVertV
+                                   ,FaceVertVT: FaceVertVT
+                                   ,FaceVertVN: FaceVertVN
+                                   ,FaceVertVTN: FaceVertVTN
+                                   ,FlatColored: FlatColored
+                                   ,FlatTextured: FlatTextured
+                                   ,SmoothColored: SmoothColored
+                                   ,SmoothTextured: SmoothTextured
+                                   ,MaterialModel: MaterialModel
+                                   ,EmptyModel: EmptyModel
                                    ,VertV: VertV
                                    ,VertVT: VertVT
                                    ,VertVN: VertVN
