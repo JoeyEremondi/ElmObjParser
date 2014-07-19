@@ -19,10 +19,7 @@ import Graphics.ObjParserInternal as Internal
 
 import Graphics.ObjTypes (..)
 
-{-| 
-The result of loading a a model from an OBJ file
--}
-type Model = Internal.Model
+
 
 {-|
  Given an the string of an OBJ file and material options, convert it to a model
@@ -42,7 +39,7 @@ toEntity = Internal.toEntity
 A default model with no triangles
 -}
 emptyModel : Model
-emptyModel = Internal.EmptyModel
+emptyModel = EmptyModel
 
    
 

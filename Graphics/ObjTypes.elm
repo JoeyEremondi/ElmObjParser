@@ -87,6 +87,11 @@ type Material = {
     reflectivity : Maybe Float
 }
 
+{-| 
+The result of loading a a model from an OBJ file
+-}
+type Model = InternalModel
+
 {-|
 A type specifying properties of an object to be rendered.
 These values could be altered every frame using signals,
@@ -111,3 +116,17 @@ type GlobalProperties = {
      mainLight : LightSource
 }
 
+
+data FaceVert =   FaceVertV VertV
+  | FaceVertVT VertVT
+  | FaceVertVN VertVN
+  | FaceVertVTN VertVTN
+
+--TODO empty model a bad idea?
+data InternalModel = 
+  FlatColored [Triangle VertV] {color:Vec3}
+  | FlatTextured [Triangle VertVT] {texture : Texture}
+  | SmoothColored [Triangle VertVN] {color:Vec3}
+  | SmoothTextured [Triangle VertVTN] {texture : Texture}
+  | MaterialModel [Triangle VertVTN] Material Texture
+  | EmptyModel

@@ -20,19 +20,7 @@ import Graphics.Camera as Camera
 
 
 
-data FaceVert =   FaceVertV VertV
-  | FaceVertVT VertVT
-  | FaceVertVN VertVN
-  | FaceVertVTN VertVTN
 
---TODP empty model a bad idea?
-data Model = 
-  FlatColored [Triangle VertV] {color:Vec3}
-  | FlatTextured [Triangle VertVT] {texture : Texture}
-  | SmoothColored [Triangle VertVN] {color:Vec3}
-  | SmoothTextured [Triangle VertVTN] {texture : Texture}
-  | MaterialModel [Triangle VertVTN] Material Texture
-  | EmptyModel
 
 
  --Normal matrix calculations for a given uniform
