@@ -2,7 +2,7 @@ module Graphics.ObjTypes where
 
 {-| General types used in loading of OBJ files.
 
-@docs VertV, VertVT, VertVN, VertVTN, MaterialData, Uniforms 
+@docs Model, VertV, VertVT, VertVN, VertVTN, MaterialData, ColorData, ShadowData, ProjectionType, LightSource, Material, ObjectProperties, GlobalProperties
 
 -}
 

@@ -2,7 +2,7 @@ module Graphics.ObjParser where
 
 {-| General types used in loading of OBJ files.
 
-@docs Model, toModel, toEntity, emptyModel
+@docs  toModel, toEntity, emptyModel
 
 -}
 
