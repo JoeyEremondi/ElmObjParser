@@ -1,7 +1,7 @@
 {
     "version": "0.4",
     "summary": "High-level library for manipulating 3D scenes",
-    "description": "This package provides a parser converting OBJ files into triangle lists, possibly with texture-coordinate or normal data. The package also provides the shaders for rendering such models, possibly with textures and lighting.\n      Note that elm-webgl and elm-linear-algebra are dependencies of this project. LoadAssets is needed to run the test file.\n      Not all features of OBJ files are supported, and rendering is still fairly primitive. Many features will be added in the future.",
+    "description": "This allows for high level manipulation of lighting, cameras, and objects in a 3D scene, as well as parsing of OBJ files.\n     Note that elm-webgl and elm-linear-algebra are dependencies of this project. LoadAssets is needed to run the test file.\n      Not all features of OBJ files are supported.",
     "license": "BSD3",
     "exposed-modules": [
         "Graphics.ObjParser",
