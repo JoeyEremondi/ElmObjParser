@@ -2847,13 +2847,15 @@ Elm.Graphics.ObjParser.make = function (_elm) {
    var Text = Elm.Text.make(_elm);
    var Time = Elm.Time.make(_elm);
    var _op = {};
+   var render = Graphics.ObjParserInternal.render;
    var emptyModel = Graphics.ObjTypes.EmptyModel;
    var toEntity = Graphics.ObjParserInternal.toEntity;
    var toModel = Graphics.ObjParserInternal.toModel;
    _elm.Graphics.ObjParser.values = {_op: _op
                                     ,toModel: toModel
                                     ,toEntity: toEntity
-                                    ,emptyModel: emptyModel};
+                                    ,emptyModel: emptyModel
+                                    ,render: render};
    return _elm.Graphics.ObjParser.values;
 };Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.ObjParserInternal = Elm.Graphics.ObjParserInternal || {};
@@ -3404,13 +3406,35 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
          }();
       }();
    });
-   var triToList = function (_v99) {
+   var render = F2(function (modList,
+   globalProps) {
       return function () {
-         switch (_v99.ctor)
+         var entities = A2(List.map,
+         function (_v99) {
+            return function () {
+               switch (_v99.ctor)
+               {case "_Tuple2":
+                  return A3(toEntity,
+                    _v99._0,
+                    _v99._1,
+                    globalProps);}
+               _E.Case($moduleName,
+               "on line 205, column 41 to 74");
+            }();
+         },
+         modList);
+         return A2(Graphics.WebGL.webgl,
+         globalProps.screenDims,
+         entities);
+      }();
+   });
+   var triToList = function (_v103) {
+      return function () {
+         switch (_v103.ctor)
          {case "_Tuple3":
-            return _L.fromArray([_v99._0
-                                ,_v99._1
-                                ,_v99._2]);}
+            return _L.fromArray([_v103._0
+                                ,_v103._1
+                                ,_v103._2]);}
          _E.Case($moduleName,
          "on line 36, column 21 to 28");
       }();
@@ -3423,82 +3447,82 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
          triToList,
          triangles));
          return function () {
-            var _v104 = {ctor: "_Tuple4"
+            var _v108 = {ctor: "_Tuple4"
                         ,_0: containsV(faceList)
                         ,_1: containsVT(faceList)
                         ,_2: containsVN(faceList)
                         ,_3: colorData};
-            switch (_v104.ctor)
+            switch (_v108.ctor)
             {case "_Tuple4":
-               switch (_v104._0)
+               switch (_v108._0)
                  {case true:
-                    switch (_v104._3.ctor)
+                    switch (_v108._3.ctor)
                       {case "OneColorMaterial":
                          return A2(Graphics.ObjTypes.FlatColored,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toV),
                            triangles),
-                           {_: {},color: _v104._3._0});}
+                           {_: {},color: _v108._3._0});}
                       break;}
-                 switch (_v104._1)
-                 {case true: switch (_v104._2)
+                 switch (_v108._1)
+                 {case true: switch (_v108._2)
                       {case true:
-                         switch (_v104._3.ctor)
+                         switch (_v108._3.ctor)
                            {case "OneColorMaterial":
                               return A2(Graphics.ObjTypes.FlatColored,
                                 A2(List.map,
                                 Graphics.WebGL.mapTriangle(toV),
                                 triangles),
-                                {_: {},color: _v104._3._0});}
+                                {_: {},color: _v108._3._0});}
                            break;}
-                      switch (_v104._3.ctor)
+                      switch (_v108._3.ctor)
                       {case "OneColorMaterial":
                          return A2(Graphics.ObjTypes.FlatColored,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toV),
                            triangles),
-                           {_: {},color: _v104._3._0});
+                           {_: {},color: _v108._3._0});
                          case "OneTextureMaterial":
                          return A2(Graphics.ObjTypes.FlatTextured,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toVT),
                            triangles),
-                           {_: {},texture: _v104._3._0});}
+                           {_: {},texture: _v108._3._0});}
                       break;}
-                 switch (_v104._2)
+                 switch (_v108._2)
                  {case true:
-                    switch (_v104._3.ctor)
+                    switch (_v108._3.ctor)
                       {case "OneColorMaterial":
                          return A2(Graphics.ObjTypes.SmoothColored,
                            A2(List.map,
                            Graphics.WebGL.mapTriangle(toVN),
                            triangles),
-                           {_: {},color: _v104._3._0});}
+                           {_: {},color: _v108._3._0});}
                       break;}
-                 switch (_v104._0)
-                 {case false: switch (_v104._1)
-                      {case false: switch (_v104._2)
+                 switch (_v108._0)
+                 {case false: switch (_v108._1)
+                      {case false: switch (_v108._2)
                            {case false:
-                              switch (_v104._3.ctor)
+                              switch (_v108._3.ctor)
                                 {case "FullMaterial":
                                    return A3(Graphics.ObjTypes.MaterialModel,
                                      A2(List.map,
                                      Graphics.WebGL.mapTriangle(toVTN),
                                      triangles),
-                                     _v104._3._0,
-                                     _v104._3._1);
+                                     _v108._3._0,
+                                     _v108._3._1);
                                    case "OneColorMaterial":
                                    return A2(Graphics.ObjTypes.SmoothColored,
                                      A2(List.map,
                                      Graphics.WebGL.mapTriangle(toVN),
                                      triangles),
-                                     {_: {},color: _v104._3._0});
+                                     {_: {},color: _v108._3._0});
                                    case "OneTextureMaterial":
                                    return A2(Graphics.ObjTypes.SmoothTextured,
                                      A2(List.map,
                                      Graphics.WebGL.mapTriangle(toVTN),
                                      triangles),
-                                     {_: {},texture: _v104._3._0});}
+                                     {_: {},texture: _v108._3._0});}
                                 break;}
                            break;}
                       break;}
@@ -3550,6 +3574,7 @@ Elm.Graphics.ObjParserInternal.make = function (_elm) {
                                             ,fromJust: fromJust
                                             ,deIndexVert: deIndexVert
                                             ,parseObj: parseObj
+                                            ,render: render
                                             ,FaceV: FaceV
                                             ,FaceVT: FaceVT
                                             ,FaceVN: FaceVN
