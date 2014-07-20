@@ -2,7 +2,7 @@ module Graphics.ObjParser where
 
 {-| General types used in loading of OBJ files.
 
-@docs  toModel, toEntity, emptyModel
+@docs  toModel, render, emptyModel
 
 -}
 
@@ -41,7 +41,11 @@ A default model with no triangles
 emptyModel : Model
 emptyModel = EmptyModel
 
-   
-
+{-|
+Given a list of models and their properties, and the global properties for a scene,
+render it into the actual WebGL element which can be placed in an HTML page.
+-}   
+render : [(Model, ObjectProperties)] -> GlobalProperties -> Element
+render = Internal.render
 
 
