@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "starting deploy"
+cat elm_dependencies.json
 mv elm_dependencies.json elm_deps
 echo "done move"
 cat elm_deps | tr  "\n" " " > elm_deps
