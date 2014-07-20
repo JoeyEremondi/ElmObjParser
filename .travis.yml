@@ -14,8 +14,8 @@ install:
 - chmod +x ./elm
 - chmod +x ./elm-get
 - tar -xzf elm_home.tar.gz ./
-- ./elm-get install johnpmayer/elm-linear-algebra
-- ./elm-get install johnpmayer/elm-webgl
+- yes | ./elm-get install johnpmayer/elm-linear-algebra
+- yes | ./elm-get install johnpmayer/elm-webgl
 before_script:
 - cd build
 - git checkout gh-pages
