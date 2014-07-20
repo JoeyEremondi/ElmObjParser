@@ -10,6 +10,7 @@ env:
 install: 
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm-get
+- wget http://JoeyEremondi.github.io/elm-travis-cache/elm-doc
 - wget http://JoeyEremondi.github.io/elm-travis-cache/elm_home.tar.gz
 - chmod +x ./elm
 - chmod +x ./elm-get
