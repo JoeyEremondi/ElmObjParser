@@ -9,6 +9,8 @@
     ],
     "elm-version": "0.12.3",
     "dependencies": {
+        "johnpmayer/elm-linear-algebra" : "1.0",
+        "johnpmayer/elm-webgl" : "0.1"
         
     },
     "repository": "https://github.com/JoeyEremondi/ElmObjParser.git"
