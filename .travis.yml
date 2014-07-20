@@ -23,7 +23,7 @@ before_script:
 - cd ..
 script: 
  - ./elm --make --set-runtime="http://eremondi.com/elm-travis-cache/elm-runtime.js" ObjTest.elm 
- - ./elm --make --set-runtime="http://eremondi.com/elm-travis-cache/elm-runtime.js" ObjDemo.elm 
+ #- ./elm --make --set-runtime="http://eremondi.com/elm-travis-cache/elm-runtime.js" ObjDemo.elm 
  - yes | cp ./*.jpg ./build
  - yes | cp ./*.png ./build
  - yes | cp ./*.obj ./build
