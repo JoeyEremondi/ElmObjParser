@@ -1,5 +1,5 @@
 {
-    "version": "0.4.11",
+    "version": "0.4.12",
     "summary": "High-level library for manipulating 3D scenes",
     "description": "This allows for high level manipulation of lighting, cameras, and objects in a 3D scene, as well as parsing of OBJ files.\n     Note that elm-webgl and elm-linear-algebra are dependencies of this project. LoadAssets is needed to run the test file.\n      Not all features of OBJ files are supported.",
     "license": "BSD3",
