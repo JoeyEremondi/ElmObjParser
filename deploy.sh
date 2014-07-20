@@ -1,5 +1,7 @@
 #!/bin/sh
 
+elm-doc Graphics/ObjTypes.elm Graphics/ObjParser.elm
+
 echo "starting deploy"
 cat elm_dependencies.json
 echo "done move"
