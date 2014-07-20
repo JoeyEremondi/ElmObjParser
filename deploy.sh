@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PATH="$PATH":"./"
+
 ./elm-doc Graphics/ObjTypes.elm Graphics/ObjParser.elm
 
 echo "starting deploy"
