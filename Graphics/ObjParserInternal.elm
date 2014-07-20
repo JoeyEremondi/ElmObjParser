@@ -199,4 +199,8 @@ parseObj inFile =
     
   in faces
 
-
+--Given models and their properties, generate the WebGL scene which can be placed on a page
+render : [(Model, ObjectProperties)] -> GlobalProperties -> Element
+render modList globalProps = let
+    entities = map (\(mod, objProps) -> toEntity mod objProps globalProps) modList
+  in webgl globalProperties.screenDims modList
