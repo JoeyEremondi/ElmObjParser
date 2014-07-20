@@ -203,4 +203,4 @@ parseObj inFile =
 render : [(Model, ObjectProperties)] -> GlobalProperties -> Element
 render modList globalProps = let
     entities = map (\(mod, objProps) -> toEntity mod objProps globalProps) modList
-  in webgl globalProperties.screenDims modList
+  in webgl globalProps.screenDims modList
