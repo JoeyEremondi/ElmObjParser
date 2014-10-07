@@ -2,7 +2,8 @@ module Graphics.ObjShaders where
 
 import Math.Vector3 (..)
 import Math.Vector4 (..)
-import Math.Matrix4 (..)
+import Math.Matrix4
+import Math.Matrix4 (Mat4)
 import Graphics.WebGL (..)
 
 import Graphics.ObjTypes (..)
@@ -10,7 +11,6 @@ import Graphics.ObjTypes (..)
 import Graphics.Camera as Camera
 
 import Native.Graphics.WebGL
-
 
 basicFragShader = [glsl|
 
@@ -254,10 +254,10 @@ ones = vec3 1 1 1
 --i.e. only given diffuse color or texture, not both
 defaultFullUniforms : Texture -> FullShaderUniforms
 defaultFullUniforms tex = {
-    modelMatrix = identity,
-    viewMatrix = identity,
-    perspectiveMatrix = identity,
-    normalMatrix = identity,
+    modelMatrix = Math.Matrix4.identity,
+    viewMatrix = Math.Matrix4.identity,
+    perspectiveMatrix = Math.Matrix4.identity,
+    normalMatrix = Math.Matrix4.identity,
     
     pointLightPosition = origin,
     pointLightSpecular = origin,
@@ -286,7 +286,7 @@ defaultFullUniforms tex = {
     useBumpTexture  = 0.0 }
 
 --Given screen dimensions, make the appropriate perspective matrix
-perspectiveForDims (w,h) = (makePerspective 45 (toFloat w / toFloat h) 0.01 100)    
+perspectiveForDims (w,h) = (Math.Matrix4.makePerspective 45 (toFloat w / toFloat h) 0.01 100)    
     
 --Given a default texture, material properties, and high level obj/global properties,
 --Convert these values into the form read by the shader
@@ -309,12 +309,12 @@ makeUniforms tex matProps objProps globalProps = let
       Nothing -> uni4
       Just t -> {uni4 | bumpTexture <- t, useBumpTexture <- 1.0 }
       
-    modelMatrix = mul (makeTranslate objProps.position) <| mul (makeScale objProps.scaleFactor) (makeRotate objProps.rotation <| vec3 0 1 0)
+    modelMatrix = Math.Matrix4.mul (Math.Matrix4.makeTranslate objProps.position) <| Math.Matrix4.mul (Math.Matrix4.makeScale objProps.scaleFactor) (Math.Matrix4.makeRotate objProps.rotation <| vec3 0 1 0)
     viewMatrix =  Camera.makeView globalProps.camera
     perspectiveMatrix = perspectiveForDims globalProps.screenDims
     normalMatrix = let
-            mv = mul viewMatrix modelMatrix 
-        in transpose <| inverseOrthonormal mv 
+            mv = Math.Matrix4.mul viewMatrix modelMatrix 
+        in Math.Matrix4.transpose <| Math.Matrix4.inverseOrthonormal mv 
     
     u6 = {u5 | modelMatrix <- modelMatrix, viewMatrix <- viewMatrix, perspectiveMatrix <- perspectiveMatrix, normalMatrix <- normalMatrix }
     
@@ -360,7 +360,7 @@ void main(){
    vNorm = (normalMatrix * vec4(normal, 1.0)).xyz;
    if (1.0 == 0.0)
    {
-	lightVec = pointLightPosition.xyz;
+  lightVec = pointLightPosition.xyz;
    }
    else
    {
