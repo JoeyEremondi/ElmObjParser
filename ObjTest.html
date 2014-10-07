@@ -145,13 +145,13 @@ Elm.Native.MJS.make = function(elm) {
         return a[2];
     }
     V3.setX = function V3_setX(x, a) {
-        return new MJS_FLOAT_ARRAY_TYPE(x, a[1], a[2]);
+        return new MJS_FLOAT_ARRAY_TYPE([x, a[1], a[2]]);
     }
     V3.setY = function V3_setY(y, a) {
-        return new MJS_FLOAT_ARRAY_TYPE(a[0], y, a[2]);
+        return new MJS_FLOAT_ARRAY_TYPE([a[0], y, a[2]]);
     }
     V3.setZ = function V3_setZ(z, a) {
-        return new MJS_FLOAT_ARRAY_TYPE(a[0], a[1], z);
+        return new MJS_FLOAT_ARRAY_TYPE([a[0], a[1], z]);
     }
 
     V3.toTuple3 = function V3_toTuple3(a) {
@@ -338,7 +338,7 @@ Elm.Native.MJS.make = function(elm) {
         return Math.sqrt(dx * dx + dy * dy + dz * dz);
     };
 
-    V3.distanceSquared = function V3_distanceSquared(a) {
+    V3.distanceSquared = function V3_distanceSquared(a, b) {
         var dx = a[0] - b[0];
         var dy = a[1] - b[1];
         var dz = a[2] - b[2];
@@ -1787,7 +1787,7 @@ Elm.Native.MJS.make = function(elm) {
         m4x4makeBasis: F3(M4x4.makeBasis)
     };
 
-}
+};
 
 /*
  * Copyright (c) 2010 Mozilla Corporation
@@ -1953,7 +1953,7 @@ Elm.Native.Math.Vector4.make = function(elm) {
         return Math.sqrt(dx * dx + dy * dy + dz * dz + dw * dw);
     };
 
-    V4.distanceSquared = function V4_distanceSquared(a) {
+    V4.distanceSquared = function V4_distanceSquared(a, b) {
         var dx = a[0] - b[0];
         var dy = a[1] - b[1];
         var dz = a[2] - b[2];
@@ -2011,7 +2011,7 @@ Elm.Native.Math.Vector4.make = function(elm) {
         dot: F2(V4.dot)
     };
 
-}
+};
 
 /*
  * Copyright (c) 2010 Mozilla Corporation
@@ -2149,7 +2149,7 @@ Elm.Native.Math.Vector2.make = function(elm) {
         return Math.sqrt(dx * dx + dy * dy);
     };
 
-    V2.distanceSquared = function V2_distanceSquared(a) {
+    V2.distanceSquared = function V2_distanceSquared(a, b) {
         var dx = a[0] - b[0];
         var dy = a[1] - b[1];
         return dx * dx + dy * dy;
@@ -2197,16 +2197,19 @@ Elm.Native.Math.Vector2.make = function(elm) {
         dot: F2(V2.dot)
     };
 
-}
+};
 Elm.Native.Graphics.WebGL = {};
 Elm.Native.Graphics.WebGL.make = function(elm) {
-
-  // LOG LEVEL
 
   elm.Native = elm.Native || {};
   elm.Native.Graphics = elm.Native.Graphics || {};
   elm.Native.Graphics.WebGL = elm.Native.Graphics.WebGL || {};
   if (elm.Native.Graphics.WebGL.values) return elm.Native.Graphics.WebGL.values;
+
+  // setup logging
+  function LOG(msg) {
+    // console.log(msg);
+  }
 
   var newNode = ElmRuntime.use(ElmRuntime.Render.Utils).newElement;
   var newElement = Elm.Graphics.Element.make(elm).newElement;
@@ -2249,7 +2252,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
       buffer.guid = Utils.guid();
     }
 
-    return model = {
+    return {
       vert: vert,
       frag: frag,
       buffer: buffer,
@@ -2261,7 +2264,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   function do_texture (gl, img) {
 
     var tex = gl.createTexture();
-    console.log("Created texture");
+    LOG("Created texture");
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
@@ -2276,7 +2279,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   function do_compile (gl, src, tipe) {
 
     var shader = gl.createShader(tipe);
-    console.log("Created shader");
+    LOG("Created shader");
 
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
@@ -2292,7 +2295,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
   function do_link (gl, vshader, fshader) {
 
     var program = gl.createProgram();
-    console.log("Created program");
+    LOG("Created program");
 
     gl.attachShader(program, vshader);
     gl.attachShader(program, fshader);
@@ -2333,7 +2336,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
           var array = new Float32Array(data);
 
           var buffer = gl.createBuffer();
-          console.log("Created attribute buffer " + attribute.name);
+          LOG("Created attribute buffer " + attribute.name);
           gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
           gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
 
@@ -2342,7 +2345,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
           break;
 
         default:
-          console.log("Bad buffer type");
+          LOG("Bad buffer type");
           break;
       }
 
@@ -2350,7 +2353,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
     var numIndices = 3 * List.length(bufferElems);
     var indices = List.toArray(List.range(0, numIndices - 1));
-    console.log("Created index buffer");
+    LOG("Created index buffer");
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
@@ -2371,7 +2374,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
 
     gl.viewport(0, 0, model.w, model.h);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    console.log("Drawing");
+    LOG("Drawing");
 
     function drawEntity(entity) {
 
@@ -2452,7 +2455,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
             textureCounter += 1;
             break;
           default:
-            console.log("Unsupported uniform type: " + uniform.type);
+            LOG("Unsupported uniform type: " + uniform.type);
             break;
         }
       }
@@ -2480,7 +2483,7 @@ Elm.Native.Graphics.WebGL.make = function(elm) {
             gl.vertexAttribPointer(attribLocation, 3, gl.FLOAT, false, 0, 0);
             break;
           default:
-            console.log("Unsupported attribute type: " + attribute.type);
+            LOG("Unsupported attribute type: " + attribute.type);
             break;
         }
       }
@@ -3627,7 +3630,7 @@ Elm.Graphics.ObjShaders.make = function (_elm) {
    var Time = Elm.Time.make(_elm);
    var _op = {};
    var fullFragmentShader = {"src": "\n\n\nprecision lowp float;\nuniform mat4 normalMatrix;\n\nuniform vec3 pointLightPosition;\nuniform vec3 pointLightDiffuse;\nuniform vec3 pointLightSpecular;\n\n\nuniform vec3 globalAmbient;\n\nuniform vec3 ambientColor;\nuniform sampler2D ambientTexture;\nuniform float useAmbientColor;\nuniform float useAmbientTexture;\n\nuniform vec3 diffuseColor;\nuniform sampler2D diffuseTexture;\nuniform float useDiffuseColor;\nuniform float useDiffuseTexture;\n\nuniform vec3 specularColor;\nuniform sampler2D specularTexture;\nuniform float useSpecularColor;\nuniform float useSpecularTexture;\n\nuniform sampler2D bumpTexture;\nuniform float useBumpTexture;\n\nuniform float specularCoeff;\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\nvarying vec3 lightVec;\n\n\nvoid main () {\n\n  // all following gemetric computations are performed in the\n  // camera coordinate system (aka eye coordinates)\n  //TODO normalize?\n  vec3 lightDirection = normalize(lightVec);\n  vec3 normal = normalize(vNorm) + (1.0*useBumpTexture)*(texture2D(bumpTexture, tcoord.xy)).xyz;\n  vec3 vertPos = vcoord;\n  vec3 reflectDir = reflect(-lightDirection, normal);\n  vec3 viewMatrixDir = (-vertPos);\n  \n  vec3 materialBase = useAmbientColor*ambientColor + useAmbientTexture*(texture2D(ambientTexture, tcoord.xy).xyz);\n  \n  vec3 materialDiffuse = useDiffuseColor * diffuseColor + useDiffuseTexture*(texture2D(diffuseTexture, tcoord.xy).xyz);\n  \n  vec3 materialSpecular = useSpecularColor*specularColor + useSpecularTexture*(texture2D(specularTexture, tcoord.xy).xyz);\n  \n  vec3 base = globalAmbient * materialBase;\n  vec3 diff = pointLightDiffuse * materialDiffuse;\n  vec3 spec = pointLightSpecular * materialSpecular;\n  \n\n  float lambertian = max(dot(lightDirection,vNorm), 0.0);\n  float specular = 0.0;\n  \n  if(lambertian > 0.0) {\n    float specAngle = max(dot(reflectDir, viewMatrixDir), 0.0);\n    specular = pow(specAngle, specularCoeff);\n       \n    \n  }\n  gl_FragColor = vec4((lambertian*diff + specular*spec) + base, 1.0);\n\n\n\n  \n}\n\n"};
-   var fullVertexShader = {"src": "\n\nprecision lowp float;\n\nattribute vec3 position;\nattribute vec3 texCoord;\nattribute vec3 normal;\n\nuniform vec3 pointLightPosition;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nuniform mat4 perspectiveMatrix;\nuniform mat4 normalMatrix;\n\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\nvarying vec3 lightVec;\n\n\n\n//Based off http://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SIXTH_EDITION/CODE/CHAPTER05/WINDOWS_VERSIONS/vshader56.glsl\nvoid main(){\n    gl_Position = perspectiveMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);    \n  \n   vcoord = (viewMatrix * modelMatrix * vec4(position, 1.0)).xyz;\n   tcoord = texCoord;\n   vNorm = (normalMatrix * vec4(normal, 1.0)).xyz;\n   if (1.0 == 0.0)\n   {\n\tlightVec = pointLightPosition.xyz;\n   }\n   else\n   {\n     lightVec = (pointLightPosition.xyz - vcoord);\n   }\n   //lightVec =  (1.0-pointLightPosition.w) * pointLightPosition.xyz + (pointLightPosition.w)*(pointLightPosition.xyz - vcoord);\n \n \n}\n\n\n"};
+   var fullVertexShader = {"src": "\n\nprecision lowp float;\n\nattribute vec3 position;\nattribute vec3 texCoord;\nattribute vec3 normal;\n\nuniform vec3 pointLightPosition;\nuniform mat4 modelMatrix;\nuniform mat4 viewMatrix;\nuniform mat4 perspectiveMatrix;\nuniform mat4 normalMatrix;\n\nvarying vec3 vcoord;\nvarying vec3 tcoord;\nvarying vec3 vNorm;\nvarying vec3 lightVec;\n\n\n\n//Based off http://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SIXTH_EDITION/CODE/CHAPTER05/WINDOWS_VERSIONS/vshader56.glsl\nvoid main(){\n    gl_Position = perspectiveMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);    \n  \n   vcoord = (viewMatrix * modelMatrix * vec4(position, 1.0)).xyz;\n   tcoord = texCoord;\n   vNorm = (normalMatrix * vec4(normal, 1.0)).xyz;\n   if (1.0 == 0.0)\n   {\n  lightVec = pointLightPosition.xyz;\n   }\n   else\n   {\n     lightVec = (pointLightPosition.xyz - vcoord);\n   }\n   //lightVec =  (1.0-pointLightPosition.w) * pointLightPosition.xyz + (pointLightPosition.w)*(pointLightPosition.xyz - vcoord);\n \n \n}\n\n\n"};
    var testEntity = A3(Graphics.WebGL.entity,
    fullVertexShader,
    fullFragmentShader,
@@ -3642,7 +3645,7 @@ Elm.Graphics.ObjShaders.make = function (_elm) {
               1.0e-2,
               100);}
          _E.Case($moduleName,
-         "on line 289, column 29 to 80");
+         "on line 289, column 34 to 93");
       }();
    };
    var ones = A3(Math.Vector3.vec3,
